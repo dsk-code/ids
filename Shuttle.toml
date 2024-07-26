@@ -1,0 +1,4 @@
+assets = [
+  "frontend/dist/*",
+  "frontend/src/images/*"
+]

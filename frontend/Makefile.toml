@@ -1,0 +1,62 @@
+
+# windowsは.cmdがいる
+# --React Router install
+[tasks.react_router_install]
+command = "pnpm"
+args = ["install", "react-router-dom"]
+
+# --Recoil install
+[tasks.recoil_install]
+command = "pnpm"
+args = ["install", "recoil"]
+
+# --tailwindcss
+[tasks.tailwindcss_install]
+command = "pnpm"
+args = ["install", "-D", "tailwindcss"]
+
+[tasks.taileindcss_init]
+command = "npx"
+args = ["tailwindcss", "init"]
+dependencies = ["tailwindcss_install"]
+
+# tailwindcss コンポーネントライブラリ
+[tasks.tailwindcss_css_forms]
+command = "pnpm"
+args = ["install", "-D", "@tailwindcss/forms"]
+
+# tailwindcss プラグイン
+[tasks.preline_install]
+command = "pnpm"
+args = ["i", "preline"]
+dependencies = ["tailwindcss_css_forms"]
+
+# react-icons install
+[tasks.react_icons_install]
+command = "pnpm"
+args = ["install", "react-icons", "--save"]
+
+# distをcleanするためのやつ
+[tasks.rimraf_install]
+command = "pnpm"
+args = ["install", "--save-dev", "rimraf"]
+
+# React-Datepicker install
+[tasks.react-datepicker_install]
+command = "pnpm"
+args = ["install", "react-datepicker", "--save"]
+
+# date-fns install
+[tasks.date-fns_install]
+command = "pnpm"
+args = ["install", "date-fns"]
+
+# preline combobox install
+[tasks.preline_combobox_install]
+command = "pnpm"
+args = ["i", "@preline/combobox"]
+
+# Auth0 install
+[tasks.auth0_install]
+command = "pnpm"
+args = ["install", "@auth0/auth0-react"]

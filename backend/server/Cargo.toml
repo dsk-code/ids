@@ -1,0 +1,14 @@
+[package]
+name = "ids_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7.4"
+shuttle-axum = "0.47.0"
+shuttle-runtime = "0.47.0"
+tokio = "1.28.2"
+tower-http = {version = "0.5.2", features = ["fs", "cors"]}
+
+ids_auth = { path = "../auth/" }
+ids_database = { path = "../database/" }

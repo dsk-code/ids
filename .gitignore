@@ -1,0 +1,9 @@
+/target
+.shuttle-storage
+Secrets*.toml
+.DS_Store
+.env
+tailwind.css
+/dist
+cargo.lock
+.vscode/
