@@ -5,5 +5,5 @@ Secrets*.toml
 .env
 tailwind.css
 /dist
-cargo.lock
+Cargo.lock
 .vscode/
