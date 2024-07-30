@@ -65,14 +65,14 @@ const SideBar: React.FC = () => {
         spacing: true,
         submenu: menu2_submenuItems.length === 0 ? false : true,
         submenuItems: menu2_submenuItems,
-        link: "/users?name=",
+        link: "/user/users?name=",
     }
     const menu3 = {
         id: 2,
         title: "教諭",
         spacing: false,
         submenu: false,
-        link: "/test1"
+        link: "/user/test1"
     }
     Menus.push(menu1, menu2, menu3);
     

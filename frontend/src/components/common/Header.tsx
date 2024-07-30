@@ -1,7 +1,8 @@
 import { NavLink } from "react-router-dom";
 import BackButtonArrow from "./BackButtonArrow";
 import ForwardButtonArrow from "./ForwardButtonArrow";
-import LoginButton from "../LoginButton";
+// import { LogoutButton } from "../auth/ LogoutButton";
+import Auth0NavButtons from "../auth/Auth0NavButtons";
 
 export default function Header() {
     return (
@@ -13,10 +14,10 @@ export default function Header() {
               <ForwardButtonArrow />
             </div>
             <div className="flex flex-row items-center gap-5 mt-5 sm:justify-end sm:mt-0 sm:ps-5">
-              <NavLink to="/test1" className="font-medium text-blue-500 select-none">Test1</NavLink>
+              <NavLink to="/user/test1" className="font-medium text-blue-500 select-none">Test1</NavLink>
               <a className="font-medium text-gray-600 hover:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 select-none" href="#">Account</a>
               <a className="font-medium text-gray-600 hover:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 select-none" href="#">Work</a>
-              <LoginButton />
+              <Auth0NavButtons />
             </div>
         </nav>
         </header>

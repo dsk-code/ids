@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.secondary-title {
+    @apply text-3xl font-bold;
+}
+
+.secondary-title::before {
+    content: "";
+    @apply block w-12 h-2 bg-theme rounded-full mb-1 z-20;
+}
