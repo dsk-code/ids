@@ -1,21 +1,28 @@
+use ids_server as server;
+
 use axum::{http::HeaderValue, Router};
-use tower_http::services::{ServeDir, ServeFile};
 use tower_http::cors::{Any, CorsLayer};
-
-
-// async fn hello_world() -> &'static str {
-//     "Hello, world!"
-// }
+use shuttle_runtime::SecretStore;
 
 #[shuttle_runtime::main]
-async fn main() -> shuttle_axum::ShuttleAxum {
+async fn main(
+    #[shuttle_shared_db::Postgres(
+        local_uri = "{secrets.DATABASE_URL}"
+    )] pool: sqlx::PgPool,
+    #[shuttle_runtime::Secrets] secrets: SecretStore,
+) -> shuttle_axum::ShuttleAxum {
+    let state = server::init(secrets, pool)
+        .await
+        .context("failed to init")?;
+    let state = Arc::new(state);
+
     let origins = [
-        "http://localhost:3000".parse::<HeaderValue>().unwrap(),
-        "https://kids-mng.vercel.app".parse::<HeaderValue>().unwrap(),
+        secrets.get("CORS_URL_1").parse::<HeaderValue>().unwrap(),
+        secrets.get("CORS_URL_2").parse::<HeaderValue>().unwrap(),
     ];
 
     let router = Router::new()
-        .merge(static_roouter())
+        .merge(server::router::static_file::static_roouter())
         .layer(CorsLayer::new()
             .allow_origin(origins)
             .allow_methods(Any)
@@ -23,14 +30,3 @@ async fn main() -> shuttle_axum::ShuttleAxum {
 
     Ok(router.into())
 }
-
-pub fn static_roouter() -> Router {
-    Router::new()
-        .nest_service("/assets", ServeDir::new("frontend/dist/assets"))
-        .fallback_service(
-            ServeDir::new("frontend/dist").not_found_service(ServeFile::new("frontend/dist/index.html")),
-        )
-}
-// .nest_service("/assets", ServeDir::new("assets"))
-//         .fallback_service(
-//             ServeDir::new("dist").not_found_service(ServeFile::new("dist/index.html")),

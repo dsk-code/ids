@@ -2,7 +2,20 @@
 default_to_workspace = false
 
 # --backend
-[tasks.sqlx-cli]
+[tasks.sqlx-cli_install]
 command = "cargo"
 args = ["install", "sqlx-cli", "--no-default-features", "--features", "native-tls,postgres"]
 
+# migration 'cargo make sqlx-migrate-add <name>
+[tasks.sqlx-migrate-add]
+command = "sqlx"
+args = ["migrate", "add", "-r", "--source", "./backend/database/migrations", "${@}"]
+
+[tasks.sqlx-migrate-run]
+command = "sqlx"
+args = ["migrate", "run", "--source", "./backend/database/migrations"]
+
+# (注)ロールバック
+[tasks.sqlx-migrate-revert]
+command = "sqlx"
+args = ["migrate", "revert", "--source", "./backend/database/migrations"]

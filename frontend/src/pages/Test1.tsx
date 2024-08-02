@@ -7,7 +7,11 @@ import { useAuth0 } from '@auth0/auth0-react';
 
 const Test1: React.FC = () => {
     const [startDate, setStartDate] = useState(new Date());
-    const { isAuthenticated } = useAuth0();
+    const { isAuthenticated, user } = useAuth0();
+
+    if (!user) {
+        return null;
+    }
 
     if (isAuthenticated) {
         return(
@@ -27,6 +31,8 @@ const Test1: React.FC = () => {
                         dateFormat="yyyy-MM-dd HH:mm"
                     />
                 </div>
+                <h2>{user.name}</h2>
+                <h2>{user.email}</h2>
             </>
         )
     }
