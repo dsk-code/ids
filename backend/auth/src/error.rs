@@ -1,11 +1,14 @@
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Error, Debug)]
 pub enum AuthError {
-    #[error("Failed to set key")]
-    KeySetFailure,
-    #[error("JWT encoding error: {0}")]
-    EncodeError(String),
-    #[error("JWT decoding error: {0}")]
-    DecodeError(String),
+    #[error("request failed: {0}")]
+    RequestError(#[from] reqwest::Error),
+    #[error("Initial key set failed")]
+    InvalidKeyset,
+    #[error("JWT validation failed: {0}")]
+    DecodeInvalidJwt(#[from] jsonwebtoken::errors::Error),
+    #[error("not found {0}")]
+    NotFound(String),
 }
+

@@ -9,7 +9,12 @@ rust-version.workspace = true
 
 [dependencies]
 jsonwebtoken = "9.3.0"
-serde = "1.0.204"
-uuid = "1.10.0"
-chrono  = "0.4.38"
+serde = {version = "1.0.0", features = ["derive"]}
+uuid = {version = "1.8.0", features = ["v4", "serde"]}
+chrono  = "0.4.37"
+reqwest = { version = "0.12.7", features = ["json"] }
+tokio = {version = "1.39.3", features = ["full"]}
+dotenvy = "0.15.7"
+envy = "0.4.2"
+url = "2.5.2"
 thiserror = "1.0.63"

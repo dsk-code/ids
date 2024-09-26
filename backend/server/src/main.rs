@@ -3,6 +3,8 @@ use ids_server as server;
 use axum::{http::HeaderValue, Router};
 use tower_http::cors::{Any, CorsLayer};
 use shuttle_runtime::SecretStore;
+use std::sync::Arc;
+use anyhow::Context as _;
 
 #[shuttle_runtime::main]
 async fn main(
@@ -17,12 +19,14 @@ async fn main(
     let state = Arc::new(state);
 
     let origins = [
-        secrets.get("CORS_URL_1").parse::<HeaderValue>().unwrap(),
-        secrets.get("CORS_URL_2").parse::<HeaderValue>().unwrap(),
+        secrets.get("CORS_URL_1").expect("REASON").parse::<HeaderValue>().unwrap(),
+        secrets.get("CORS_URL_2").expect("REASON").parse::<HeaderValue>().unwrap(),
     ];
 
     let router = Router::new()
         .merge(server::router::static_file::static_roouter())
+        .nest("/auth", )
+        .nest("/api/v1", api(state.clone()))
         .layer(CorsLayer::new()
             .allow_origin(origins)
             .allow_methods(Any)
