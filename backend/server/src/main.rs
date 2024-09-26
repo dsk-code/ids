@@ -1,4 +1,5 @@
 use ids_server as server;
+use ids_server::router::api::api;
 
 use axum::{http::HeaderValue, Router};
 use tower_http::cors::{Any, CorsLayer};
@@ -13,7 +14,7 @@ async fn main(
     )] pool: sqlx::PgPool,
     #[shuttle_runtime::Secrets] secrets: SecretStore,
 ) -> shuttle_axum::ShuttleAxum {
-    let state = server::init(secrets, pool)
+    let state = server::init(secrets.clone(), pool)
         .await
         .context("failed to init")?;
     let state = Arc::new(state);
@@ -25,7 +26,6 @@ async fn main(
 
     let router = Router::new()
         .merge(server::router::static_file::static_roouter())
-        .nest("/auth", )
         .nest("/api/v1", api(state.clone()))
         .layer(CorsLayer::new()
             .allow_origin(origins)

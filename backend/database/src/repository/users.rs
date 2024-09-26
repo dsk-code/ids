@@ -4,10 +4,12 @@ use crate::error::Error;
 use crate::DbConnector;
 
 use derive_new::new;
+use uuid::Uuid;
 
 #[derive(Debug, new)]
 pub struct CreateUserEntity {
-    pub id: String,
+    pub id: Uuid,
+    pub user_name: String,
     pub user_email: String,
     pub picture: String,
 }
@@ -34,12 +36,13 @@ impl UserRepository {
         let res = sqlx::query!(
             r#"
                 INSERT INTO users
-                    (id, user_email, given_name, family_name, picture)
+                    (id, user_name, user_email, picture)
                 VALUES
-                    ($1, $2, $3, $4, $5)
+                    ($1, $2, $3, $4)
                     ON CONFLICT DO NOTHING
             "#,
             input.id,
+            input.user_name,
             input.user_email,
             input.picture,
         )

@@ -16,7 +16,8 @@ export const SignupButton: React.FC = () => {
   };
 
   return (
-    <button className="button__sign-up" onClick={handleSignUp}>
+    <button className="px-6 py-2 bg-theme font-bold rounded-lg hover:bg-purple-600 
+        transition-all duration-300" onClick={handleSignUp}>
       Sign Up
     </button>
   );

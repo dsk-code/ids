@@ -24,9 +24,7 @@ pub enum Error {
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         let status = match self {
-            Error::AuthError(auth::error::AuthError::EncodeError(_)) => StatusCode::UNAUTHORIZED,
-            Error::AuthError(auth::error::AuthError::DecodeError(_)) => StatusCode::UNAUTHORIZED,
-            Error::AuthError(auth::error::AuthError::KeySetFailure) => StatusCode::UNAUTHORIZED,
+            Error::AuthError(auth::error::AuthError::InvalidKeyset) => StatusCode::UNAUTHORIZED,
             Error::PasswordHashingError => StatusCode::INTERNAL_SERVER_ERROR,
             Error::NotFoundSecrets(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::DbError(db::error::Error::DatabaseError(_)) => StatusCode::CONFLICT,

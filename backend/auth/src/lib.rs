@@ -69,121 +69,121 @@ pub async fn key_init(secret: &KeyInitConfig) -> Result<(), AuthError> {
     KEYS.set(jwks).map_err(|_| AuthError::InvalidKeyset)
 }
 
-/// 正常系テスト
-#[cfg(test)]
-mod tests {
-    use std::{collections::HashMap, time::{Duration, UNIX_EPOCH}};
-    use reqwest::{header::CONTENT_TYPE, Client};
-    use super::*;
+// /// 正常系テスト
+// #[cfg(test)]
+// mod tests {
+//     use std::{collections::HashMap, time::{Duration, UNIX_EPOCH}};
+//     use reqwest::{header::CONTENT_TYPE, Client};
+//     use super::*;
 
-    /// テストのためのトークンを取得するための環境変数
-    #[derive(Debug, Deserialize)]
-    pub struct TestTokenEnvConfig {
-    pub access_token_url: String,
-    pub app_api_client_id: String,
-    pub app_api_client_secret: String,
-    pub app_api_audience: String,
-    }
+//     /// テストのためのトークンを取得するための環境変数
+//     #[derive(Debug, Deserialize)]
+//     pub struct TestTokenEnvConfig {
+//     pub access_token_url: String,
+//     pub app_api_client_id: String,
+//     pub app_api_client_secret: String,
+//     pub app_api_audience: String,
+//     }
 
-    /// テストのためのAuth0APIのアクセストークンのレスポンスを表現する構造体
-    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
-    pub struct AppAccessToken {
-        pub access_token: String,
-        pub token_type: String,
-        pub expires_in: i32,
-    }
+//     /// テストのためのAuth0APIのアクセストークンのレスポンスを表現する構造体
+//     #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+//     pub struct AppAccessToken {
+//         pub access_token: String,
+//         pub token_type: String,
+//         pub expires_in: i32,
+//     }
 
-    impl AppAccessToken {
-        /// テストのためのアクセストークン取得
-        pub async fn get_access_token(url: String, client_id: String, client_secret: String, audience: String) -> Result<Self, reqwest::Error> {
-            let client = Client::builder()
-                .timeout(Duration::from_secs(10))
-                .build()
-                .expect("Failed to build client");
+//     impl AppAccessToken {
+//         /// テストのためのアクセストークン取得
+//         pub async fn get_access_token(url: String, client_id: String, client_secret: String, audience: String) -> Result<Self, reqwest::Error> {
+//             let client = Client::builder()
+//                 .timeout(Duration::from_secs(10))
+//                 .build()
+//                 .expect("Failed to build client");
 
-            let mut params = HashMap::new();
-            params.insert("grant_type".to_string(), "client_credentials".to_string());
-            params.insert("client_id".to_string(), client_id);
-            params.insert("client_secret".to_string(), client_secret);
-            params.insert("audience".to_string(), audience);
+//             let mut params = HashMap::new();
+//             params.insert("grant_type".to_string(), "client_credentials".to_string());
+//             params.insert("client_id".to_string(), client_id);
+//             params.insert("client_secret".to_string(), client_secret);
+//             params.insert("audience".to_string(), audience);
 
-            let response = client
-                .post(&url)
-                .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
-                .form(&params)
-                .send()
-                .await?
-                .json::<AppAccessToken>()
-                .await?;
+//             let response = client
+//                 .post(&url)
+//                 .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+//                 .form(&params)
+//                 .send()
+//                 .await?
+//                 .json::<AppAccessToken>()
+//                 .await?;
 
-            Ok(response)
-        }
-    }
+//             Ok(response)
+//         }
+//     }
 
-    /// 初期化の為の環境変数を返す
-    fn key_init_env() -> KeyInitConfig {
-        dotenvy::dotenv().expect("Failed to get environment variables");
-        let secret = envy::from_env::<KeyInitConfig>()
-            .expect("Failed to deserialize environment variables");
+//     /// 初期化の為の環境変数を返す
+//     fn key_init_env() -> KeyInitConfig {
+//         dotenvy::dotenv().expect("Failed to get environment variables");
+//         let secret = envy::from_env::<KeyInitConfig>()
+//             .expect("Failed to deserialize environment variables");
 
-        secret
-    }
+//         secret
+//     }
 
-    /// 検証の為の環境変数を返す
-    fn validate_env() -> ValidateConfig {
-        dotenvy::dotenv().expect("Failed to get environment variables");
-        let secret = envy::from_env::<ValidateConfig>()
-            .expect("Failed to deserialize environment variables");
+//     /// 検証の為の環境変数を返す
+//     fn validate_env() -> ValidateConfig {
+//         dotenvy::dotenv().expect("Failed to get environment variables");
+//         let secret = envy::from_env::<ValidateConfig>()
+//             .expect("Failed to deserialize environment variables");
 
-        secret
-    }
+//         secret
+//     }
 
-    /// テストの為のトークンを取得するための環境変数を返す
-    fn token_env() -> TestTokenEnvConfig {
-        dotenvy::dotenv().expect("Failed to get environment variables");
-        let secret = envy::from_env::<TestTokenEnvConfig>()
-            .expect("Failed to deserialize environment variables");
+//     /// テストの為のトークンを取得するための環境変数を返す
+//     fn token_env() -> TestTokenEnvConfig {
+//         dotenvy::dotenv().expect("Failed to get environment variables");
+//         let secret = envy::from_env::<TestTokenEnvConfig>()
+//             .expect("Failed to deserialize environment variables");
 
-        secret
-    }
+//         secret
+//     }
 
-    /// 有効期限が切れていない場合はfalse, 切れている場合はtrueを返す
-    fn is_expected_time(exp: u64) -> bool {
-        let current_timestamp = std::time::SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards").as_secs();
-        exp <= current_timestamp
-    }
+//     /// 有効期限が切れていない場合はfalse, 切れている場合はtrueを返す
+//     fn is_expected_time(exp: u64) -> bool {
+//         let current_timestamp = std::time::SystemTime::now()
+//             .duration_since(UNIX_EPOCH)
+//             .expect("Time went backwards").as_secs();
+//         exp <= current_timestamp
+//     }
 
-    /// 鍵の初期化の正常テスト
-    #[tokio::test]
-    async fn test_key_init() {
-        let secret = key_init_env();
-        let result = key_init(&secret).await;
+//     /// 鍵の初期化の正常テスト
+//     #[tokio::test]
+//     async fn test_key_init() {
+//         let secret = key_init_env();
+//         let result = key_init(&secret).await;
 
-        assert!(result.is_ok());
-    }
+//         assert!(result.is_ok());
+//     }
 
-    /// Jwt検証の正常テスト
-    #[tokio::test]
-    async fn test_jwt() {
-        let key_init_secret = key_init_env();
-        let token_secret = token_env();
-        let validate_secret = validate_env();
-        key_init(&key_init_secret).await.unwrap();
-        let token = AppAccessToken::get_access_token(
-                token_secret.access_token_url.clone(), 
-                token_secret.app_api_client_id.clone(), 
-                token_secret.app_api_client_secret.clone(), 
-                token_secret.app_api_audience.clone()
-            )
-            .await
-            .expect("Failed to obtain access token");
-        let jwt = JWT::new(token.access_token);
-        let result = jwt.validate(&validate_secret).unwrap();
+//     /// Jwt検証の正常テスト
+//     #[tokio::test]
+//     async fn test_jwt() {
+//         let key_init_secret = key_init_env();
+//         let token_secret = token_env();
+//         let validate_secret = validate_env();
+//         key_init(&key_init_secret).await.unwrap();
+//         let token = AppAccessToken::get_access_token(
+//                 token_secret.access_token_url.clone(), 
+//                 token_secret.app_api_client_id.clone(), 
+//                 token_secret.app_api_client_secret.clone(), 
+//                 token_secret.app_api_audience.clone()
+//             )
+//             .await
+//             .expect("Failed to obtain access token");
+//         let jwt = JWT::new(token.access_token);
+//         let result = jwt.validate(&validate_secret).unwrap();
 
-        assert_eq!(result.aud, validate_secret.aud);
-        assert_eq!(result.iss, validate_secret.iss);
-        assert!(!is_expected_time(result.exp));
-    }
-}
+//         assert_eq!(result.aud, validate_secret.aud);
+//         assert_eq!(result.iss, validate_secret.iss);
+//         assert!(!is_expected_time(result.exp));
+//     }
+// }

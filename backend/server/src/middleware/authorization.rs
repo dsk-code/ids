@@ -1,6 +1,6 @@
 
 
-#[derive(Debug, Clone)]
-pub struct AuthUser {
+// #[derive(Debug, Clone)]
+// pub struct AuthUser {
     
-}
+// }
