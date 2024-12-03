@@ -50,7 +50,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/user/" element={<Layout />}>
-            <Route path="" element={<Root />} />
+            <Route path="" element={<AuthenticationGuard component={Root} />} />
             <Route path="users" element={<AuthenticationGuard component={UsersList} />} />
             <Route path="users/:id" element={<User />} />
             <Route path="test1" element={<AuthenticationGuard component={Test1} />} />
