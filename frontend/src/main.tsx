@@ -5,8 +5,6 @@ import "preline/preline";
 import { RecoilRoot } from "recoil";
 import { Auth0ProviderWithNavigate } from "./auth/auth0-provider-with-navigate";
 import { BrowserRouter } from "react-router-dom";
-// import { Auth0Provider } from "@auth0/auth0-react";
-
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

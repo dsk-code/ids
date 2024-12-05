@@ -1,5 +1,5 @@
 import React from 'react'
-import { Information } from '../pages/Root';
+import { Information } from './information';
 import { format } from 'date-fns';
 
 type InfoListProps = {

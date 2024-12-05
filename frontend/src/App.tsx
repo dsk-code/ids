@@ -11,8 +11,8 @@ import UsersList from "./pages/UsersList";
 import User from "./pages/User";
 import Test1 from "./pages/Test1";
 import NotFound from "./pages/NotFound";
-import { useAuth0 } from "@auth0/auth0-react";
-import PageLoader from "./components/common/PageLoader";
+// import { useAuth0 } from "@auth0/auth0-react";
+// import PageLoader from "./components/common/PageLoader";
 import { AuthenticationGuard } from "./components/auth/AuthenticationGuard";
 
 // prelineが全体で使えるように
@@ -23,7 +23,7 @@ declare global {
 }
 
 const App: React.FC = () => {
-  const { isLoading } = useAuth0();
+  // const { isLoading } = useAuth0();
   // const location = useLocation();
 
   // useEffect(() => {
@@ -37,13 +37,13 @@ const App: React.FC = () => {
     }
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="page-layout">
-        <PageLoader />
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="page-layout">
+  //       <PageLoader />
+  //     </div>
+  //   );
+  // }
 
   return (
     <>
