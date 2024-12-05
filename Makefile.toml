@@ -1,13 +1,43 @@
 [config]
 default_to_workspace = false
 
-# --backend
+# *** backend ***
+[tasks.run]
+description = "Run 'cargo shuttle run'"
+command = "cargo"
+args = ["shuttle", "run"]
+
+
+# *** frontend ***
+[tasks.front_dev]
+description = "Run 'pnpm run dev' in the frontend directory"
+command = "pnpm"
+args = ["run", "dev"]
+cwd = "./frontend"
+
+[tasks.front_build]
+description = "Run 'pnpm run build' in the frontend directory"
+command = "pnpm"
+args = ["run", "build"]
+cwd = "./frontend"
+
+[tasks.front_clean]
+# distを空にする
+description = "Run 'pnpm run clean' in the frontend directory"
+command = "pnpm"
+args = ["run", "crean"]
+cwd = "./frontend"
+
+
+# *** sqlx-cli ***
+# https://github.com/launchbadge/sqlx/blob/main/sqlx-cli/README.md#enable-building-in-offline-mode-with-query
 [tasks.sqlx-cli_install]
 command = "cargo"
 args = ["install", "sqlx-cli", "--no-default-features", "--features", "native-tls,postgres"]
 
-# migration 'cargo make sqlx-migrate-add <name>
 [tasks.sqlx-migrate-add]
+# `cargo make sqlx-migrate-add <file_name>`
+description = "Adding migration files for 'up' and 'down'"
 command = "sqlx"
 args = ["migrate", "add", "-r", "--source", "./backend/database/migrations", "${@}"]
 
@@ -15,7 +45,8 @@ args = ["migrate", "add", "-r", "--source", "./backend/database/migrations", "${
 command = "sqlx"
 args = ["migrate", "run", "--source", "./backend/database/migrations"]
 
-# (注)ロールバック
 [tasks.sqlx-migrate-revert]
+# (注)ロールバック
 command = "sqlx"
 args = ["migrate", "revert", "--source", "./backend/database/migrations"]
+

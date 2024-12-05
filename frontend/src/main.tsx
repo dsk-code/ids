@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "preline/preline";
 import { RecoilRoot } from "recoil";
-import { Auth0ProviderWithNavigate } from "./auth/auth0-provider-with-navigate";
+import { Auth0ProviderWithNavigate } from "./components/auth/auth0-provider-with-navigate";
 import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
