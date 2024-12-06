@@ -7,6 +7,16 @@ description = "Run 'cargo shuttle run'"
 command = "cargo"
 args = ["shuttle", "run"]
 
+[tasks.deploy]
+description = "Run 'cargo shuttle deploy'"
+command = "cargo"
+args = ["shuttle", "deploy"]
+
+[tasks.project_restart]
+description = "Run 'cargo project restart'"
+command = "cargo"
+args = ["shuttle", "project", "restart"]
+
 
 # *** frontend ***
 [tasks.front_dev]
