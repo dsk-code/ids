@@ -9,13 +9,13 @@ interface Auth0ProviderWithNavigateProps {
 
 export const Auth0ProviderWithNavigate: React.FC<Auth0ProviderWithNavigateProps> = ({ children }) => {
   const navigate = useNavigate();
-  const { domain, clientId, callbackUrl, audience, scope } = useEnv();
+  const { domain, clientId, callbackUrl, audience, scope, appDmain } = useEnv();
 
   const onRedirectCallback = (appState?: AppState) => {
     navigate(appState?.returnTo || window.location.pathname);
   };
 
-  if (!(domain && clientId && callbackUrl)) {
+  if (!(domain && clientId && callbackUrl && appDmain)) {
     return null;
   }
 
@@ -30,8 +30,8 @@ export const Auth0ProviderWithNavigate: React.FC<Auth0ProviderWithNavigateProps>
         scope: scope
       }}
       onRedirectCallback={onRedirectCallback}
-      // cookieDomain="your-domain.com"  // ドメインを設定
-      cacheLocation="localstorage" // Cookieの代わりにLocal Storageを使用
+      cookieDomain={appDmain}  // ドメインを設定
+      // cacheLocation="localstorage" // Cookieの代わりにLocal Storageを使用
     >
       {children}
     </Auth0Provider>

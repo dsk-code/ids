@@ -4,6 +4,7 @@ interface EnvVariables {
     VITE_AUTH0_CALLBACK_URL: string;
     VITE_AUTH0_AUDIENCE: string;
     VITE_AUTH0_SCOPE: string;
+    VITE_AUTH0_APP_DOMEIN: string;
 }
   
 const useEnv = () => {
@@ -16,6 +17,7 @@ const useEnv = () => {
         callbackUrl: env.VITE_AUTH0_CALLBACK_URL || "",
         audience: env.VITE_AUTH0_AUDIENCE || "",
         scope: env.VITE_AUTH0_SCOPE || "",
+        appDmain: env.VITE_AUTH0_APP_DOMEIN || "",
     };
 };
   
