@@ -1,5 +1,5 @@
 [package]
-name.workspace = true
+name = "ids_shared"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

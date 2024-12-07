@@ -16,3 +16,4 @@ anyhow = "1.0.86"
 
 ids_auth = { path = "../auth/" }
 ids_database = { path = "../database/" }
+ids_shared = {path = "../shared/"}
