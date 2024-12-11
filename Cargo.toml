@@ -3,6 +3,7 @@ members = [
     "backend/auth", 
     "backend/database",
     "backend/server",
+    "backend/shared",
 ]
 
 resolver = "2"
@@ -12,3 +13,6 @@ name = "ids"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.76"
+
+[workspace.dependencies]
+uuid = {version = "1.11.0", features = ["v4"]}
