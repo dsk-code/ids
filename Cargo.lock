@@ -1212,6 +1212,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ids_shared"
+version = "0.1.0"
+dependencies = [
+ "uuid",
+]
+
+[[package]]
 name = "indexmap"
 version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
