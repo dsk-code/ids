@@ -1201,6 +1201,7 @@ dependencies = [
  "axum 0.7.5",
  "ids_auth",
  "ids_database",
+ "ids_shared",
  "shuttle-axum",
  "shuttle-runtime",
  "shuttle-shared-db",
@@ -1209,6 +1210,10 @@ dependencies = [
  "tokio",
  "tower-http",
 ]
+
+[[package]]
+name = "ids_shared"
+version = "0.1.0"
 
 [[package]]
 name = "indexmap"
