@@ -1,2 +1,2 @@
-pub mod static_file;
 pub mod api;
+pub mod static_file;

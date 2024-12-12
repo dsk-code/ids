@@ -1,7 +1,7 @@
 pub mod error;
 pub mod repository;
 
-pub use repository::users::UserRepository;
+pub use repository::users::{UserEntity, UserRepository};
 
 use error::Error;
 use sqlx::PgPool;

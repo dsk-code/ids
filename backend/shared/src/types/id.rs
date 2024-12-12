@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-#[derive(Debug,)]
+#[derive(Debug, Clone)]
 pub struct UserId(Uuid);
 
 impl From<Uuid> for UserId {

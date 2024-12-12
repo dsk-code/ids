@@ -1,10 +1,18 @@
-use std::sync::Arc;
+use ids_shared as shared;
 
 use crate::error::Error;
 use crate::DbConnector;
 
 use derive_new::new;
+use shared::UserId;
+use std::sync::Arc;
 use uuid::Uuid;
+
+#[derive(Debug, new)]
+pub struct UserEntity {
+    pub id: UserId,
+    pub user_name: Option<String>,
+}
 
 #[derive(Debug, new)]
 pub struct CreateUserEntity {
@@ -12,6 +20,7 @@ pub struct CreateUserEntity {
     pub user_name: String,
     pub user_email: String,
     pub picture: String,
+    pub auth0_id: String,
 }
 
 #[derive(Debug, new)]
@@ -23,6 +32,12 @@ pub struct InputUserEntity {
     pub picture: String,
 }
 
+#[derive(Debug, new)]
+pub struct InputUserValidateEntity {
+    pub auth0_id: String,
+    pub email: String,
+}
+
 pub struct UserRepository(Arc<DbConnector>);
 
 impl UserRepository {
@@ -32,28 +47,73 @@ impl UserRepository {
 
     pub async fn create(&self, input: CreateUserEntity) -> Result<(), Error> {
         let pool = self.0.get_pool();
+        let mut tx = pool.begin().await?;
+        println!("transaction start");
 
-        let res = sqlx::query!(
+        println!("Start inserting into users table");
+        let user_id = sqlx::query_scalar!(
             r#"
                 INSERT INTO users
                     (id, user_name, user_email, picture)
                 VALUES
                     ($1, $2, $3, $4)
-                    ON CONFLICT DO NOTHING
+                ON CONFLICT DO NOTHING
+                RETURNING id
             "#,
             input.id,
             input.user_name,
             input.user_email,
             input.picture,
         )
-        .execute(&pool)
+        .fetch_optional(&mut *tx)
         .await
         .map_err(Error::DatabaseError)?;
 
-        if res.rows_affected() == 0 {
-            return Err(Error::AlreadyExsited("user".into()));
-        }
+        let user_id = match user_id {
+            Some(id) => {
+                println!("Successfully inserted into users table");
+                id
+            }
+            None => return Err(Error::AlreadyExsited("user".into())),
+        };
+
+        println!("Start inserting into user_credentials table");
+        sqlx::query!(
+            r#"
+            INSERT INTO user_credentials (user_id, auth0_id)
+            VALUES ($1, $2)
+            "#,
+            user_id,
+            input.auth0_id
+        )
+        .execute(&mut *tx)
+        .await?;
+        println!("Successfully inserted into user_credentials table");
+
+        tx.commit().await?;
         Ok(())
+    }
+
+    pub async fn validate_get(&self, input: InputUserValidateEntity) -> Result<UserEntity, Error> {
+        let pool = self.0.get_pool();
+
+        let user = sqlx::query_as!(
+            UserEntity,
+            r#"
+                SELECT u.id, u.user_name
+                FROM user_credentials uc
+                JOIN users u ON uc.user_id = u.id
+                WHERE uc.auth0_id = $1
+                AND u.user_email = $2
+            "#,
+            input.auth0_id,
+            input.email,
+        )
+        .fetch_one(&pool)
+        .await
+        .map_err(|e| Error::DatabaseError(e))?;
+
+        Ok(user)
     }
 }
 

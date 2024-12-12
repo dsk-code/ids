@@ -2,10 +2,15 @@
 default_to_workspace = false
 
 # *** backend ***
+[tasks.fmt]
+command = "cargo"
+args = ["fmt"]
+
 [tasks.run]
 description = "Run 'cargo shuttle run'"
 command = "cargo"
 args = ["shuttle", "run"]
+dependencies = ["fmt"]
 
 [tasks.deploy]
 description = "Run 'cargo shuttle deploy'"

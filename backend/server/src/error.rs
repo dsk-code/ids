@@ -1,7 +1,6 @@
 use ids_auth as auth;
 use ids_database as db;
 
-
 use auth::error;
 
 use axum::{http::StatusCode, response::IntoResponse};

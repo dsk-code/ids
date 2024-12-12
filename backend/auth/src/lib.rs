@@ -2,13 +2,13 @@ pub mod client;
 pub mod error;
 pub mod types;
 
-use crate::client::{ManageMentAccessToken, Jwks};
+use crate::client::{Jwks, ManageMentAccessToken};
 use crate::error::AuthError;
 use crate::types::{KeyInitConfig, ValidateConfig};
 
-use std::sync::OnceLock;
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
+use std::sync::OnceLock;
 
 static KEYS: OnceLock<Jwks> = OnceLock::new();
 
@@ -55,16 +55,14 @@ impl JWT {
 pub async fn key_init(secret: &KeyInitConfig) -> Result<(), AuthError> {
     // 管理APIアクセストークン取得
     let access_token = ManageMentAccessToken::get_access_token(
-        secret.access_token_url.clone(), 
-        secret.management_api_client_id.clone(), 
-        secret.management_api_client_secret.clone(), 
-        secret.management_api_audience.clone()
-    ).await?;
+        secret.access_token_url.clone(),
+        secret.management_api_client_id.clone(),
+        secret.management_api_client_secret.clone(),
+        secret.management_api_audience.clone(),
+    )
+    .await?;
     // JWKS取得
-    let jwks = Jwks::new(
-        secret.jwks_url.clone(), 
-        access_token
-    ).await?;
+    let jwks = Jwks::new(secret.jwks_url.clone(), access_token).await?;
 
     KEYS.set(jwks).map_err(|_| AuthError::InvalidKeyset)
 }
@@ -172,9 +170,9 @@ pub async fn key_init(secret: &KeyInitConfig) -> Result<(), AuthError> {
 //         let validate_secret = validate_env();
 //         key_init(&key_init_secret).await.unwrap();
 //         let token = AppAccessToken::get_access_token(
-//                 token_secret.access_token_url.clone(), 
-//                 token_secret.app_api_client_id.clone(), 
-//                 token_secret.app_api_client_secret.clone(), 
+//                 token_secret.access_token_url.clone(),
+//                 token_secret.app_api_client_id.clone(),
+//                 token_secret.app_api_client_secret.clone(),
 //                 token_secret.app_api_audience.clone()
 //             )
 //             .await

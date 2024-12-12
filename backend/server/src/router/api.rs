@@ -1,8 +1,8 @@
 pub mod protected;
 use crate::State;
 
-use std::sync::Arc;
 use axum::{Extension, Router};
+use std::sync::Arc;
 
 pub fn api(state: Arc<State>) -> Router {
     let router = Router::new()

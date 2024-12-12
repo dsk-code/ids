@@ -15,7 +15,12 @@ pub struct ManageMentAccessToken {
 }
 
 impl ManageMentAccessToken {
-    pub async fn get_access_token(url: String, client_id: String, client_secret: String, audience: String) -> Result<Self, reqwest::Error> {
+    pub async fn get_access_token(
+        url: String,
+        client_id: String,
+        client_secret: String,
+        audience: String,
+    ) -> Result<Self, reqwest::Error> {
         let client = Client::builder()
             .timeout(Duration::from_secs(10))
             .build()
@@ -79,7 +84,8 @@ impl Jwks {
 
     /// kidに対応したJWKを返す
     pub fn get_jwk(&self, kid: &str) -> Result<Jwk, AuthError> {
-        let jwk = self.keys
+        let jwk = self
+            .keys
             .iter()
             .find(|key| &key.kid == kid)
             .cloned()

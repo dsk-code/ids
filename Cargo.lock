@@ -1187,6 +1187,7 @@ dependencies = [
  "argon2",
  "derive-new",
  "fake",
+ "ids_shared",
  "password-hash",
  "sqlx",
  "thiserror",

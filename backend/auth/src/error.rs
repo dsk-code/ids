@@ -11,4 +11,3 @@ pub enum AuthError {
     #[error("not found {0}")]
     NotFound(String),
 }
-
