@@ -1,7 +1,7 @@
 [config]
 default_to_workspace = false
 
-# *** backend ***
+# ******************* backend *******************
 [tasks.fmt]
 command = "cargo"
 args = ["fmt"]
@@ -23,7 +23,7 @@ command = "cargo"
 args = ["shuttle", "project", "restart"]
 
 
-# *** frontend ***
+# ******************* frontend *******************
 [tasks.front_dev]
 description = "Run 'pnpm run dev' in the frontend directory"
 command = "pnpm"
@@ -44,7 +44,7 @@ args = ["run", "crean"]
 cwd = "./frontend"
 
 
-# *** sqlx-cli ***
+# ******************* sqlx-cli *******************
 # https://github.com/launchbadge/sqlx/blob/main/sqlx-cli/README.md#enable-building-in-offline-mode-with-query
 [tasks.sqlx-cli_install]
 command = "cargo"
