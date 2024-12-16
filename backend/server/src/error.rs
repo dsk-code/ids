@@ -10,6 +10,8 @@ use thiserror::Error;
 pub enum Error {
     #[error("{0}")]
     AuthError(#[from] error::AuthError),
+    #[error("{0}")]
+    RequiredAuthorization(String),
     #[error("Not Found secrets: {0}")]
     NotFoundSecrets(String),
     #[error("Password hashing failed.")]

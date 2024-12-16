@@ -16,3 +16,9 @@ pub struct ValidateConfig {
     pub aud: String,
     pub iss: String,
 }
+
+impl ValidateConfig {
+    pub fn new(aud: String, iss: String) -> Self {
+        Self { aud, iss }
+    }
+}

@@ -4,7 +4,7 @@ pub mod types;
 
 use crate::client::{Jwks, ManageMentAccessToken};
 use crate::error::AuthError;
-use crate::types::{KeyInitConfig, ValidateConfig};
+pub use crate::types::{KeyInitConfig, ValidateConfig};
 
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};

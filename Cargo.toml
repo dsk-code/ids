@@ -15,4 +15,5 @@ edition = "2021"
 rust-version = "1.76"
 
 [workspace.dependencies]
+axum-extra = "0.9.6"
 uuid = {version = "1.11.0", features = ["v4", "serde"]}

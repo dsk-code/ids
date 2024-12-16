@@ -15,11 +15,15 @@ use std::sync::Arc;
 
 pub struct State {
     db: Arc<DbConnector>,
+    secret_store: SecretStore,
 }
 
 impl State {
-    pub fn new(db: DbConnector) -> Self {
-        Self { db: Arc::new(db) }
+    pub fn new(db: DbConnector, secret_store: SecretStore) -> Self {
+        Self {
+            db: Arc::new(db),
+            secret_store,
+        }
     }
 
     pub fn db(&self) -> Arc<DbConnector> {
@@ -48,7 +52,7 @@ pub async fn init(secret_store: SecretStore, pool: PgPool) -> Result<State, Erro
 
     key_init(&auth_secret).await?;
 
-    let db = State::new(DbConnector::new(pool));
+    let db = State::new(DbConnector::new(pool), secret_store);
 
     Ok(db)
 }
