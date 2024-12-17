@@ -24,6 +24,7 @@ impl DbConnector {
             .run(&self.pool)
             .await
             .map_err(Error::MigrationError)?;
+
         Ok(())
     }
 }

@@ -52,7 +52,9 @@ pub async fn init(secret_store: SecretStore, pool: PgPool) -> Result<State, Erro
 
     key_init(&auth_secret).await?;
 
-    let db = State::new(DbConnector::new(pool), secret_store);
+    let db_connector = ids_database::init(pool).await?;
+
+    let db = State::new(db_connector, secret_store);
 
     Ok(db)
 }
