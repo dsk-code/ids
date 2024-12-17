@@ -9,7 +9,6 @@ use shared::{Auth0Id, UserId};
 use std::sync::Arc;
 
 #[derive(Debug, new, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct UserEntity {
     pub id: UserId,
     pub user_name: String,

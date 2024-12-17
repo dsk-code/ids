@@ -9,3 +9,8 @@ export interface AuthUser {
     userName: string;
     userEmail: string;
 }
+
+export interface ResponseAuthUser {
+    id: string;
+    userName: string;
+}

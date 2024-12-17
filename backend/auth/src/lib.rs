@@ -17,10 +17,10 @@ static KEYS: OnceLock<Jwks> = OnceLock::new();
 pub struct Claims {
     pub iss: String,
     pub sub: String,
-    pub aud: String,
+    pub aud: Vec<String>,
     pub iat: u64,
     pub exp: u64,
-    pub gty: String,
+    pub scope: String,
     pub azp: String,
 }
 
@@ -40,13 +40,17 @@ impl JWT {
     pub fn validate(&self, secret: &ValidateConfig) -> Result<Claims, AuthError> {
         let jwks = KEYS.get().ok_or(AuthError::NotFound("key".to_string()))?;
         let header = decode_header(self.access_token())?;
+        println!("{:?}", header.kid);
         let jwk = jwks.get_jwk(&header.kid.ok_or(AuthError::NotFound("kid".to_string()))?)?;
+        println!("{:?}", jwk.kid);
         let decoding_key = DecodingKey::from_rsa_components(&jwk.n, &jwk.e)?;
         let mut validation = Validation::new(Algorithm::RS256);
-        validation.set_audience(&[&secret.aud]);
-        validation.set_issuer(&[&secret.iss]);
+        validation.set_audience(&[&secret.aud, &secret.aud2]);
+        // validation.set_issuer(&[&secret.iss]);
+        println!("test");
         let token_data = decode::<Claims>(self.access_token(), &decoding_key, &validation)?;
 
+        println!("test2");
         Ok(token_data.claims)
     }
 }

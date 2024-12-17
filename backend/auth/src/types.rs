@@ -14,11 +14,12 @@ pub struct KeyInitConfig {
 #[derive(Debug, Deserialize)]
 pub struct ValidateConfig {
     pub aud: String,
+    pub aud2: String,
     pub iss: String,
 }
 
 impl ValidateConfig {
-    pub fn new(aud: String, iss: String) -> Self {
-        Self { aud, iss }
+    pub fn new(aud: String, aud2: String, iss: String) -> Self {
+        Self { aud, aud2, iss }
     }
 }

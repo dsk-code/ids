@@ -19,9 +19,11 @@ pub async fn authorization_middleware(
     request: Request,
     next: Next, // 次のミドルウェアまたはハンドラ
 ) -> Result<Response, Error> {
+    println!("リクエストが来ました");
     let (mut parts, body) = request.into_parts();
     // 認証ユーザーの抽出
     let auth_user = AuthUser::from_request_parts(&mut parts, &state).await?;
+    println!("auth_userが抽出されました");
     // リクエストの再構築
     let mut request = Request::from_parts(parts, body);
     // 抽出した auth_user をリクエストの extensions に追加
@@ -47,20 +49,32 @@ where
         let TypedHeader(Authorization(bearer)) = parts
             .extract::<TypedHeader<Authorization<Bearer>>>()
             .await
-            .map_err(|e| Error::RequiredAuthorization(e.to_string()))?;
+            .map_err(|e| {
+                eprintln!("{}", e);
+                Error::RequiredAuthorization(e.to_string())
+            })?;
 
         // JWT の検証
         let jwt = auth::JWT::new(bearer.token().to_owned());
-        let claims = jwt.validate(&ids_auth::ValidateConfig::new(
-            app_state
-                .secret_store
-                .get("AUD")
-                .ok_or(Error::NotFoundSecrets("AUD".into()))?,
-            app_state
-                .secret_store
-                .get("ISS")
-                .ok_or(Error::NotFoundSecrets("ISS".into()))?,
-        ))?;
+        let claims = jwt
+            .validate(&ids_auth::ValidateConfig::new(
+                app_state
+                    .secret_store
+                    .get("AUD")
+                    .ok_or(Error::NotFoundSecrets("AUD".into()))?,
+                app_state
+                    .secret_store
+                    .get("AUD2")
+                    .ok_or(Error::NotFoundSecrets("AUD2".into()))?,
+                app_state
+                    .secret_store
+                    .get("ISS")
+                    .ok_or(Error::NotFoundSecrets("ISS".into()))?,
+            ))
+            .map_err(|e| {
+                eprintln!("{}", e);
+                Error::AuthError(e)
+            })?;
 
         // // ユーザーの存在確認
         // let db = app_state.db();
@@ -84,6 +98,7 @@ where
         //     .await;
         // .map_err(|e| Error::RequiredAuthorization(e.to_string()))?;
 
+        println!("認可されました");
         Ok(claims.into())
     }
 }

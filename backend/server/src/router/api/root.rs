@@ -1,7 +1,7 @@
 pub mod me;
 
-use axum::{routing::get, Router};
+use axum::{routing::post, Router};
 
 pub fn router() -> Router {
-    Router::new().route("/", get(me::handler))
+    Router::new().route("/", post(me::handler))
 }
