@@ -4,3 +4,8 @@ export interface User {
     furigana?: string;
     class?: string;
 }
+
+export interface AuthUser {
+    userName: string;
+    userEmail: string;
+}
