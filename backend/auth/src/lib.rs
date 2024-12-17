@@ -44,7 +44,7 @@ impl JWT {
         let decoding_key = DecodingKey::from_rsa_components(&jwk.n, &jwk.e)?;
         let mut validation = Validation::new(Algorithm::RS256);
         validation.set_audience(&[&secret.aud, &secret.aud2]);
-        validation.set_issuer(&[&secret.iss]);
+        // validation.set_issuer(&[&secret.iss]);
         println!("test");
         let token_data = decode::<Claims>(self.access_token(), &decoding_key, &validation)?;
 
