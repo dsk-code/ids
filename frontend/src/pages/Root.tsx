@@ -41,7 +41,8 @@ const Root: React.FC = () => {
                 // APIにPOSTリクエスト
                 console.log("リクエスト開始");
                 const response = await postData<ResponseAuthUser>(
-                    "http://127.0.0.1:8000/api/v1/me",
+                    // "http://127.0.0.1:8000/api/v1/me",
+                    "https://ids.shuttleapp.rs/api/v1/me",
                     payload,
                     accessToken
                 );
