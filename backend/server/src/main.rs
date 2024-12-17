@@ -9,7 +9,8 @@ use tower_http::cors::{Any, CorsLayer};
 
 #[shuttle_runtime::main]
 async fn main(
-    #[shuttle_shared_db::Postgres(local_uri = "{secrets.DATABASE_URL}")] pool: sqlx::PgPool,
+    // #[shuttle_shared_db::Postgres(local_uri = "{secrets.DATABASE_URL}")] pool: sqlx::PgPool,
+    #[shuttle_shared_db::Postgres] pool: sqlx::PgPool,
     #[shuttle_runtime::Secrets] secrets: SecretStore,
 ) -> shuttle_axum::ShuttleAxum {
     let state = server::init(secrets.clone(), pool)
