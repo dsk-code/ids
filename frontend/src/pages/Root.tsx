@@ -32,9 +32,6 @@ const Root: React.FC = () => {
                         // prompt: "consent", // 同意を強制する
                     },
                 });
-
-                console.log(accessToken);
-
                 
                 const payload: AuthUser = {
                     userName: user.name || "",
