@@ -48,8 +48,3 @@ export default function UsersList() {
 };
 
 
-// if (user.class) {
-//     return <li key={user.id}><Link to={`/users/${user.id}`}>{user.name}{user.class}</Link></li>
-// } else {
-//     return <li key={user.id}><Link to={`/users/${user.id}`}>{user.name}</Link></li>
-// }

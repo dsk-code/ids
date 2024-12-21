@@ -5,7 +5,7 @@ import PageLoader from "../components/common/PageLoader";
 import { Outlet } from '@remix-run/react';
 import { AuthenticationGuard } from '../components/auth0/AuthenticationGuard';
 
-export default function UserLayout() {
+export default function DashboardLayout() {
     const { isLoading } = useAuth0();
 
     if (isLoading) {

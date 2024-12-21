@@ -6,7 +6,7 @@ import { postData } from '../api/api';
 import { useRecoilState } from 'recoil';
 import { authUserState } from '../recoil/atoms';
 
-export default function User() {
+export default function Dashboard() {
     // https://auth0.com/docs/quickstart/spa/react/02-calling-an-api
     const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [authUser, setAuthUser] = useRecoilState(authUserState);
@@ -28,8 +28,6 @@ export default function User() {
                 const accessToken = await getAccessTokenSilently({
                     authorizationParams: {
                         audience: audience,
-                        // scope: "read:current_user update:current_user_metadata",
-                        // prompt: "consent", // 同意を強制する
                     },
                 });
                 
@@ -62,12 +60,6 @@ export default function User() {
         
         sendUserData();
     }, [getAccessTokenSilently, user, audience]);
-
-    // if (!user) {
-    //     return (
-    //         <h3>No Data</h3>
-    //     );
-    // }
 
     return (
         isAuthenticated && (

@@ -4,7 +4,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import SearchBox from '../components/SeachBox';
 import { useAuth0 } from '@auth0/auth0-react';
-import { withAuthenticationRequired } from "@auth0/auth0-react";
 
 export default function Test1() {
     const [startDate, setStartDate] = useState(new Date());
@@ -39,8 +38,3 @@ export default function Test1() {
     }
 };
 
-// AuthGuard を適用
-// export default withAuthenticationRequired(Test1, {
-//     onRedirecting: () => <div>Loading...</div>,
-//     returnTo: '/user',
-// });

@@ -47,7 +47,7 @@ export default function SideBar() {
         title: "Home",
         spacing: false,
         submenu: false,
-        link: "/"
+        link: "/dashboard"
     }
     const menu2_submenuItems: SubmenuItem[] = [{id: 0, title: "全園児"}];
     classList.forEach(cls => {
@@ -65,14 +65,14 @@ export default function SideBar() {
         spacing: true,
         submenu: menu2_submenuItems.length === 0 ? false : true,
         submenuItems: menu2_submenuItems,
-        link: "/user/users?name=",
+        link: "/dashboard/users?name=",
     }
     const menu3 = {
         id: 2,
         title: "教諭",
         spacing: false,
         submenu: false,
-        link: "/user/test1"
+        link: "/dashboard/test1"
     }
     Menus.push(menu1, menu2, menu3);
     
