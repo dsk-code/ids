@@ -1,4 +1,5 @@
 assets = [
   "frontend/dist/*",
-  "frontend/src/images/*"
+  "frontend/src/images/*",
+  "frontend/build/client/*"
 ]

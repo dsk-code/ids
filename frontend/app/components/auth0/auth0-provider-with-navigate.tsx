@@ -1,0 +1,44 @@
+import { AppState, Auth0Provider } from "@auth0/auth0-react";
+// import { Auth0Provider } from "@auth0/auth0-react";
+import React, { ReactNode } from "react";
+// import { useNavigate } from "@remix-run/react";
+import useEnv from "../../hooks/useEnv";
+
+interface Auth0ProviderWithNavigateProps {
+    children: ReactNode;
+}
+
+export const Auth0ProviderWithNavigate: React.FC<Auth0ProviderWithNavigateProps> = ({ children }) => {
+//   const navigate = useNavigate();
+  const { domain, clientId, callbackUrl, audience, scope, appDmain } = useEnv();
+
+//   const onRedirectCallback = (appState?: AppState) => {
+//     navigate(appState?.returnTo || window.location.pathname);
+//   };
+
+  if (!(domain && clientId && callbackUrl && appDmain)) {
+    console.log("取得できない");
+    return null;
+  }
+
+  // https://auth0.com/docs/quickstart/spa/react/02-calling-an-api#get-an-access-token
+  return (
+    <Auth0Provider
+    domain={domain}
+    clientId={clientId}
+    authorizationParams={{
+        // redirect_uri: window.location.origin,
+        redirect_uri: callbackUrl,
+        audience: audience,
+        scope: scope
+        }}
+        // onRedirectCallback={onRedirectCallback}
+        // cookieDomain={appDmain}  // ドメインを設定
+        // cacheLocation="localstorage" // Cookieの代わりにLocal Storageを使用
+        >
+    {children}
+    </Auth0Provider>
+  );
+};
+
+

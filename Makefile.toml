@@ -26,22 +26,29 @@ args = ["shuttle", "project", "restart"]
 # ******************* frontend *******************
 [tasks.front_dev]
 description = "Run 'pnpm run dev' in the frontend directory"
-command = "pnpm"
+command = "npm"
 args = ["run", "dev"]
 cwd = "./frontend"
 
 [tasks.front_build]
 description = "Run 'pnpm run build' in the frontend directory"
-command = "pnpm"
+command = "npm"
 args = ["run", "build"]
 cwd = "./frontend"
 
-[tasks.front_clean]
-# distを空にする
-description = "Run 'pnpm run clean' in the frontend directory"
-command = "pnpm"
-args = ["run", "crean"]
+[tasks.front_preview]
+description = "Run 'pnpm run preview' in the frontend directory"
+command = "npm"
+args = ["run", "preview"]
 cwd = "./frontend"
+
+
+# [tasks.front_clean]
+# # distを空にする
+# description = "Run 'pnpm run clean' in the frontend directory"
+# command = "pnpm"
+# args = ["run", "crean"]
+# cwd = "./frontend"
 
 
 # ******************* sqlx-cli *******************
