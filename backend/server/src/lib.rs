@@ -63,7 +63,7 @@ pub async fn init(secret_store: SecretStore, pool: PgPool) -> Result<State, Erro
 pub mod tests {
     use super::*;
     use serde::Deserialize;
-    
+
     #[derive(Deserialize, Debug, Clone)]
     pub struct Config {
         access_token_url: String,
@@ -86,7 +86,7 @@ pub mod tests {
                 secret_store,
             }
         }
-    
+
         pub fn db(&self) -> Arc<DbConnector> {
             self.db.clone()
         }
@@ -102,22 +102,22 @@ pub mod tests {
             management_api_audience: config.management_api_audience.clone(),
             jwks_url: config.jwks_url.clone(),
         };
-    
+
         key_init(&auth_secret).await?;
-    
+
         let db_connector = ids_database::init(pool).await?;
-    
+
         let db = TestState::new(db_connector, config.clone());
-    
+
         Ok(db)
     }
 
     pub async fn test_util() -> TestState {
         dotenvy::dotenv().ok();
-        
+
         let config = envy::from_env::<Config>().unwrap();
         let test_state = init_util(config).await.unwrap();
 
-        test_state     
+        test_state
     }
 }

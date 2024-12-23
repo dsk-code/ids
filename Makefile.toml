@@ -12,6 +12,12 @@ command = "cargo"
 args = ["shuttle", "run"]
 dependencies = ["fmt"]
 
+[tasks.test_serial]
+description = "Run tests in order"
+command = "cargo"
+args = ["test", "--", "--test-threads=1"]
+
+
 [tasks.deploy]
 description = "Run 'cargo shuttle deploy'"
 command = "cargo"

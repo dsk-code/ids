@@ -11,16 +11,17 @@ use std::sync::Arc;
 #[derive(Debug, new, Deserialize, Serialize)]
 pub struct UserEntity {
     pub id: UserId,
-    pub user_name: String,
+    pub auth0_user_name: String,
 }
 
-#[derive(Debug, new)]
-pub struct CreateUserEntity {
+#[derive(Debug, new, Clone)]
+pub struct InputUserEntity {
     pub auth0_id: Auth0Id,
-    pub user_name: String,
-    pub user_email: String,
+    pub auth0_user_name: String,
+    pub auth0_user_email: String,
 }
 
+#[derive(Clone)]
 pub struct UserRepository(Arc<DbConnector>);
 
 impl UserRepository {
@@ -28,26 +29,26 @@ impl UserRepository {
         Self(db)
     }
 
-    pub async fn create(&self, input: CreateUserEntity) -> Result<(), Error> {
+    pub async fn create(&self, input: InputUserEntity) -> Result<(), Error> {
         let pool = self.0.get_pool();
 
-        println!("Start inserting into users table");
+        println!("New user registration started");
         let res = sqlx::query!(
             r#"
                 INSERT INTO users
-                    (auth0_id, user_name, user_email)
+                    (auth0_id, auth0_user_name, auth0_user_email)
                 VALUES
                     ($1, $2, $3)
                 ON CONFLICT DO NOTHING
             "#,
             input.auth0_id.id(),
-            input.user_name,
-            input.user_email,
+            input.auth0_user_name,
+            input.auth0_user_email,
         )
         .execute(&pool)
         .await
         .map_err(Error::DatabaseError)?;
-        println!("Successfully inserted into users table");
+        println!("Successful new user registration");
 
         // 重複していないかの確認
         if res.rows_affected() == 0 {
@@ -60,10 +61,11 @@ impl UserRepository {
     pub async fn find_by_id(&self, id: Auth0Id) -> Result<UserEntity, Error> {
         let pool = self.0.get_pool();
 
+        println!("Start find UserEntity");
         let user = sqlx::query_as!(
             UserEntity,
             r#"
-                SELECT id, user_name
+                SELECT id, auth0_user_name
                 FROM users
                 WHERE auth0_id = $1
             "#,
@@ -72,8 +74,49 @@ impl UserRepository {
         .fetch_one(&pool)
         .await
         .map_err(|e| Error::DatabaseError(e))?;
+        println!("Successful search for UserEntity");
 
         Ok(user)
+    }
+
+    pub async fn update(&self, input: InputUserEntity) -> Result<(), Error> {
+        let pool = self.0.get_pool();
+
+        println!("Start updating names and emails in the users table");
+        sqlx::query!(
+            r#"
+                UPDATE users
+                SET auth0_user_name = $1, auth0_user_email = $2
+                WHERE auth0_id = $3
+            "#,
+            input.auth0_user_name,
+            input.auth0_user_email,
+            input.auth0_id.id(),
+        )
+        .execute(&pool)
+        .await
+        .map_err(|e| Error::DatabaseError(e))?;
+        println!("Successfully updated name and email in users table");
+
+        Ok(())
+    }
+
+    pub async fn delete(&self, id: Auth0Id) -> Result<(), Error> {
+        let pool = self.0.get_pool();
+
+        println!("Start deleting the users table");
+        sqlx::query!(
+            r#"
+                DELETE FROM users WHERE auth0_id = $1
+            "#,
+            id.id()
+        )
+        .execute(&pool)
+        .await
+        .map_err(|e| Error::DatabaseError(e))?;
+        println!("Successfully deleted users table");
+
+        Ok(())
     }
 }
 
@@ -83,99 +126,60 @@ pub mod tests {
 
     use super::*;
 
+    async fn users_create_test(repo: UserRepository, input: InputUserEntity) {
+        let user = repo.create(input).await;
+
+        assert!(user.is_ok());
+    }
+
+    async fn users_find_test(repo: UserRepository, auth0_id: Auth0Id, expected_name: String) {
+        let user = repo.find_by_id(auth0_id).await.unwrap();
+
+        assert_eq!(expected_name, user.auth0_user_name);
+    }
+
+    async fn users_update_test(repo: UserRepository, input: InputUserEntity) {
+        let user = repo.update(input.clone()).await;
+
+        assert!(user.is_ok());
+    }
+
+    async fn users_delete_test(repo: UserRepository, auth0_id: Auth0Id) {
+        let user = repo.delete(auth0_id).await;
+
+        assert!(user.is_ok());
+    }
+
+    // CRUDの一連のテスト
     #[tokio::test]
-    async fn user_create_test() {
+    async fn users_test_in_order() {
         let repo = UserRepository(util_init().await.unwrap());
         let auth0_id = Auth0Id::from("test".to_string());
-        let user_name = "test".to_string();
+        let create_name = "test".to_string();
+        let create_email = "test@test.com".to_string();
+        let update_name = "test2".to_string();
+        let update_email = "test2@test2.com".to_string();
 
-        let create_entity = CreateUserEntity {
-            auth0_id: auth0_id.clone(),
-            user_name: user_name.clone(),
-            user_email: "test.@test.com".to_string(),
-        };
-
-        repo.create(create_entity).await.unwrap();
-
-        let user_entity = repo.find_by_id(auth0_id).await.unwrap();
-
-        assert_eq!(user_name, user_entity.user_name);
-
-
-
+        users_create_test(
+            repo.clone(),
+            InputUserEntity::new(
+                auth0_id.clone(),
+                create_name.clone(),
+                create_email,
+            ),
+        )
+        .await;
+        users_find_test(repo.clone(), auth0_id.clone(), create_name.clone()).await;
+        users_update_test(
+            repo.clone(),
+            InputUserEntity::new(
+                auth0_id.clone(),
+                update_name.clone(),
+                update_email,
+            ),
+        )
+        .await;
+        users_find_test(repo.clone(), auth0_id.clone(), update_name.clone()).await;
+        users_delete_test(repo.clone(), auth0_id.clone()).await;
     }
 }
-// #[cfg(test)]
-// pub mod tests_utils {
-//     use super::*;
-//     // use crate::repository::tests_utils::TEST_SECRET;
-//     use sqlx::PgPool;
-//     use fake::locales::EN;
-//     use fake::Fake;
-//     use fake::faker::name::raw::Name;
-//     use fake::faker::internet::raw::{FreeEmail, Password};
-//     use password_hash::{SaltString, rand_core::OsRng, PasswordHasher};
-//     use argon2::Argon2;
-//     use dotenv::{dotenv, var};
-
-//     #[derive(Debug, new)]
-//     pub struct TestUser {
-//         pub id: String,
-//         pub username: String,
-//         pub email: String,
-//         pub password_hash: String,
-//     }
-
-//     pub fn test_path() -> String {
-//         dotenv().ok();
-//         let path = var("DATABASE_URL").unwrap();
-//         path
-//     }
-
-//     pub fn create_test_input_user_entity() -> Result<InputUserEntity, Error> {
-//         let password_string = Password(EN, 15..20).fake::<String>();
-//         let password = password_string.as_bytes();
-//         let salt = SaltString::generate( &mut OsRng);
-//         let argon2 = Argon2::default();
-//         let password_hash = argon2.hash_password(password, &salt).unwrap()
-//             .to_string();
-//         let user = InputUserEntity {
-//             username: Name(EN).fake::<String>(),
-//             email: FreeEmail(EN).fake::<String>(),
-//             password_hash,
-//         };
-
-//         Ok(user)
-//     }
-
-//     pub async fn create_test_user(pool: PgPool) -> Result<Uuid, Error> {
-//         let input_user_entity = create_test_input_user_entity().unwrap();
-//         let id = Uuid::new_v4();
-//         let _ = sqlx::query!(
-//             r#"
-//                 INSERT INTO users
-//                     (id, username, email, password_hash)
-//                 VALUES
-//                     ($1::UUID, $2, $3, $4)
-//                     ON CONFLICT DO NOTHING
-//             "#,
-//             id,
-//             input_user_entity.username,
-//             input_user_entity.email,
-//             input_user_entity.password_hash
-//         )
-//         .execute(&pool)
-//         .await?;
-
-//         Ok(id)
-//     }
-
-//     #[tokio::test]
-//     async fn create_test() {
-//         let path = test_path();
-//         let pool = PgPool::connect(&path).await.unwrap();
-//         let user = create_test_user(pool).await.unwrap();
-//         println!("user = {}", user);
-//     }
-
-// }

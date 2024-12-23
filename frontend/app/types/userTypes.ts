@@ -6,11 +6,11 @@ export interface User {
 }
 
 export interface AuthUser {
-    userName: string;
-    userEmail: string;
+    auth0UserName: string;
+    auth0UserEmail: string;
 }
 
 export interface ResponseAuthUser {
     id: string;
-    userName: string;
+   auth0UserName: string;
 }

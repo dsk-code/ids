@@ -5,7 +5,7 @@ use crate::model::{
     auth_user::AuthUser, request_body::RequestAuthUser, response::ResponseAuthUser,
 };
 use crate::State;
-use db::CreateUserEntity;
+use db::InputUserEntity;
 
 use axum::{response::IntoResponse, Extension, Json};
 use std::sync::Arc;
@@ -22,10 +22,10 @@ pub async fn handler(
         Ok(user) => return Ok(Json(ResponseAuthUser::from(user))),
         Err(_) => {
             // ユーザーが見つからなかった場合、登録を行う
-            let create_user = CreateUserEntity::new(
+            let create_user = InputUserEntity::new(
                 auth_user.claims.sub.clone().into(),
-                body.user_name,
-                body.user_email,
+                body.auth0_user_name,
+                body.auth0_user_email,
             );
             repo.create(create_user).await?;
             // 登録後に再度ユーザーを検索

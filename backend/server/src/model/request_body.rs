@@ -4,6 +4,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct RequestAuthUser {
-    pub user_name: String,
-    pub user_email: String,
+    pub auth0_user_name: String,
+    pub auth0_user_email: String,
 }

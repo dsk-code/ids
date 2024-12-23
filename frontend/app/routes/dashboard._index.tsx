@@ -32,15 +32,15 @@ export default function Dashboard() {
                 });
                 
                 const payload: AuthUser = {
-                    userName: user.name || "",
-                    userEmail: user.email || "",
+                    auth0UserName: user.name || "",
+                    auth0UserEmail: user.email || "",
                 };
         
                 // APIにPOSTリクエスト
                 console.log("リクエスト開始");
                 const response = await postData<ResponseAuthUser>(
-                    // "http://127.0.0.1:8000/api/v1/me",
-                    "https://ids.shuttleapp.rs/api/v1/me",
+                    "http://127.0.0.1:8000/api/v1/me",
+                    // "https://ids.shuttleapp.rs/api/v1/me",
                     payload,
                     accessToken
                 );
@@ -70,7 +70,7 @@ export default function Dashboard() {
                 <p>{user?.email}</p>
                 <h3>User Metadata</h3>
                 <p>{authUser.id}</p>
-                <p>{authUser.userName}</p>
+                <p>{authUser.auth0UserName}</p>
             </div>
         )
     );
