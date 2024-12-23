@@ -1234,12 +1234,15 @@ version = "0.1.0"
 dependencies = [
  "argon2",
  "derive-new",
+ "dotenvy",
+ "envy",
  "fake",
  "ids_shared",
  "password-hash",
  "serde",
  "sqlx",
  "thiserror",
+ "tokio",
  "uuid",
 ]
 
@@ -1250,6 +1253,8 @@ dependencies = [
  "anyhow",
  "axum 0.7.9",
  "axum-extra",
+ "dotenvy",
+ "envy",
  "ids_auth",
  "ids_database",
  "ids_shared",

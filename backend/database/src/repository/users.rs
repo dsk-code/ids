@@ -21,21 +21,6 @@ pub struct CreateUserEntity {
     pub user_email: String,
 }
 
-#[derive(Debug, new)]
-pub struct InputUserEntity {
-    pub id: String,
-    pub user_email: String,
-    pub given_name: Option<String>,
-    pub family_name: Option<String>,
-    pub picture: String,
-}
-
-#[derive(Debug, new)]
-pub struct InputUserValidateEntity {
-    pub auth0_id: String,
-    pub email: String,
-}
-
 pub struct UserRepository(Arc<DbConnector>);
 
 impl UserRepository {
@@ -72,25 +57,6 @@ impl UserRepository {
         Ok(())
     }
 
-    // pub async fn validate_get(&self, input: InputUserValidateEntity) -> Result<UserEntity, Error> {
-    //     let pool = self.0.get_pool();
-
-    //     let user = sqlx::query_as!(
-    //         UserEntity,
-    //         r#"
-    //             SELECT id, user_name
-    //             FROM users
-    //             WHERE uc.auth0_id = $1
-    //         "#,
-    //         input.auth0_id,
-    //     )
-    //     .fetch_one(&pool)
-    //     .await
-    //     .map_err(|e| Error::DatabaseError(e))?;
-
-    //     Ok(user)
-    // }
-
     pub async fn find_by_id(&self, id: Auth0Id) -> Result<UserEntity, Error> {
         let pool = self.0.get_pool();
 
@@ -111,6 +77,34 @@ impl UserRepository {
     }
 }
 
+#[cfg(test)]
+pub mod tests {
+    use crate::tests::util_init;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn user_create_test() {
+        let repo = UserRepository(util_init().await.unwrap());
+        let auth0_id = Auth0Id::from("test".to_string());
+        let user_name = "test".to_string();
+
+        let create_entity = CreateUserEntity {
+            auth0_id: auth0_id.clone(),
+            user_name: user_name.clone(),
+            user_email: "test.@test.com".to_string(),
+        };
+
+        repo.create(create_entity).await.unwrap();
+
+        let user_entity = repo.find_by_id(auth0_id).await.unwrap();
+
+        assert_eq!(user_name, user_entity.user_name);
+
+
+
+    }
+}
 // #[cfg(test)]
 // pub mod tests_utils {
 //     use super::*;
