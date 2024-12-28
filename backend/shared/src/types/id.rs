@@ -34,3 +34,22 @@ impl Auth0Id {
         &self.0
     }
 }
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ClassId(Uuid);
+
+impl From<Uuid> for ClassId {
+    fn from(id: Uuid) -> Self {
+        Self(id)
+    }
+}
+
+impl ClassId {
+    pub fn id(self) -> Uuid {
+        self.0
+    }
+
+    pub fn new_v4() -> Self {
+        Self(Uuid::new_v4())
+    }
+}
