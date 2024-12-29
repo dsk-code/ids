@@ -17,21 +17,29 @@ pub async fn handler(
 ) -> Result<impl IntoResponse, Error> {
     let repo = db::UserRepository::new(state.db());
 
-    let user = repo.find_by_id(auth_user.claims.sub.clone().into()).await;
-    let user = match user {
-        Ok(user) => return Ok(Json(ResponseAuthUser::from(user))),
-        Err(_) => {
-            // ユーザーが見つからなかった場合、登録を行う
-            let create_user = InputUserEntity::new(
+    // ユーザー名とメールの登録状況の確認
+    println!("Check username and email registration status");
+    let user = repo.find_by_id(auth_user.claims.sub.clone().into()).await?;
+    let user = match (user.auth0_user_name.clone(), user.auth0_user_email.clone()) {
+        (Some(_), Some(_)) => {
+            // ユーザー名とメールの登録状況の確認成功
+            println!("Successful verification of username and email registration status");
+            return Ok(Json(ResponseAuthUser::from(user)));
+        }
+        _ => {
+            // ユーザー名とメールの登録がされていない
+            println!("Username and email not registered");
+            let update_user = InputUserEntity::new(
                 auth_user.claims.sub.clone().into(),
                 body.auth0_user_name,
                 body.auth0_user_email,
             );
-            repo.create(create_user).await?;
-            // 登録後に再度ユーザーを検索
+            repo.update(update_user).await?;
+            println!("Reconfirm username and email registration status");
             repo.find_by_id(auth_user.claims.sub.clone().into()).await?
         }
     };
 
+    println!("Successful verification of username and email registration status");
     Ok(Json(ResponseAuthUser::from(user)))
 }

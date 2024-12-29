@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct ResponseAuthUser {
     pub id: UserId,
-    pub auth0_user_name: String,
+    pub auth0_user_name: Option<String>,
 }
 
 impl From<UserEntity> for ResponseAuthUser {

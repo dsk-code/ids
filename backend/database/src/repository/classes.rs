@@ -97,28 +97,27 @@ impl ClassesRepository {
         Ok(classes)
     }
 
-        /// すべてのクラスを検索
-        pub async fn find_all_class(&self, input: UserId) -> Result<Vec<ClassesEntity>, Error> {
-            let pool = self.0.get_pool();
-    
-            println!("Start find ClassesEntity");
-            let classes = sqlx::query_as!(
-                ClassesEntity,
-                r#"
+    /// すべてのクラスを検索
+    pub async fn find_all_class(&self, input: UserId) -> Result<Vec<ClassesEntity>, Error> {
+        let pool = self.0.get_pool();
+
+        println!("Start find ClassesEntity");
+        let classes = sqlx::query_as!(
+            ClassesEntity,
+            r#"
                     SELECT id, class_name, age
                     FROM classes
                     WHERE user_id = $1
                 "#,
-                input.id(),
-            )
-            .fetch_all(&pool)
-            .await
-            .map_err(|e| Error::DatabaseError(e))?;
-            println!("Successful search for ClassesEntity");
-    
-            Ok(classes)
-        }
-    
+            input.id(),
+        )
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| Error::DatabaseError(e))?;
+        println!("Successful search for ClassesEntity");
+
+        Ok(classes)
+    }
 
     /// class_nameの存在確認
     pub async fn find_validate_class_name(&self, input: InputClassEntity) -> Result<bool, Error> {
@@ -187,7 +186,6 @@ impl ClassesRepository {
 
         Ok(())
     }
-
 }
 
 #[cfg(test)]
@@ -282,7 +280,6 @@ pub mod tests {
             let class_del = repo.delete(input).await;
 
             assert!(class_del.is_ok());
-
         }
         users_delete_test(auth0_id.clone()).await;
     }

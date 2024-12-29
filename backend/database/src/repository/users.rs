@@ -11,14 +11,15 @@ use std::sync::Arc;
 #[derive(Debug, new, Deserialize, Serialize)]
 pub struct UserEntity {
     pub id: UserId,
-    pub auth0_user_name: String,
+    pub auth0_user_name: Option<String>,
+    pub auth0_user_email: Option<String>,
 }
 
 #[derive(Debug, new, Clone)]
 pub struct InputUserEntity {
     pub auth0_id: Auth0Id,
-    pub auth0_user_name: String,
-    pub auth0_user_email: String,
+    pub auth0_user_name: Option<String>,
+    pub auth0_user_email: Option<String>,
 }
 
 #[derive(Clone)]
@@ -32,28 +33,26 @@ impl UserRepository {
     pub async fn create(&self, input: InputUserEntity) -> Result<(), Error> {
         let pool = self.0.get_pool();
 
-        println!("New user registration started");
+        println!("New user auth0_id registration started");
         let res = sqlx::query!(
             r#"
                 INSERT INTO users
-                    (auth0_id, auth0_user_name, auth0_user_email)
+                    (auth0_id)
                 VALUES
-                    ($1, $2, $3)
+                    ($1)
                 ON CONFLICT DO NOTHING
             "#,
             input.auth0_id.id(),
-            input.auth0_user_name,
-            input.auth0_user_email,
         )
         .execute(&pool)
         .await
         .map_err(Error::DatabaseError)?;
-        println!("Successful new user registration");
 
         // 重複していないかの確認
         if res.rows_affected() == 0 {
             return Err(Error::AlreadyExsited("users".into()));
         }
+        println!("Successful new user auth0_id registration");
 
         Ok(())
     }
@@ -65,7 +64,7 @@ impl UserRepository {
         let user = sqlx::query_as!(
             UserEntity,
             r#"
-                SELECT id, auth0_user_name
+                SELECT id, auth0_user_name, auth0_user_email
                 FROM users
                 WHERE auth0_id = $1
             "#,
@@ -131,13 +130,14 @@ pub mod tests {
         let auth0_user_name = "test".to_string();
         let auth0_user_email = "test@test.com".to_string();
 
-        let user_entity = InputUserEntity::new(auth0_id, auth0_user_name, auth0_user_email);
+        let user_entity =
+            InputUserEntity::new(auth0_id, Some(auth0_user_name), Some(auth0_user_email));
         let user = repo.create(user_entity).await;
 
         assert!(user.is_ok());
     }
 
-    async fn users_find_test(auth0_id: Auth0Id, expected: String) {
+    async fn users_find_test(auth0_id: Auth0Id, expected: Option<String>) {
         let repo = UserRepository(util_init().await.unwrap());
         let user = repo.find_by_id(auth0_id).await.unwrap();
 
@@ -155,7 +155,7 @@ pub mod tests {
         let update_name = "test2".to_string();
         let update_email = "test2@test2.com".to_string();
         let repo = UserRepository(util_init().await.unwrap());
-        let input = InputUserEntity::new(auth0_id, update_name.clone(), update_email);
+        let input = InputUserEntity::new(auth0_id, Some(update_name.clone()), Some(update_email));
 
         let user = repo.update(input.clone()).await;
 
@@ -177,9 +177,9 @@ pub mod tests {
         let update_name = "test2".to_string();
 
         users_create_test(auth0_id.clone()).await;
-        users_find_test(auth0_id.clone(), create_name).await;
+        users_find_test(auth0_id.clone(), Some(create_name)).await;
         users_update_test(auth0_id.clone()).await;
-        users_find_test(auth0_id.clone(), update_name).await;
+        users_find_test(auth0_id.clone(), Some(update_name)).await;
         users_delete_test(auth0_id.clone()).await;
     }
 }
