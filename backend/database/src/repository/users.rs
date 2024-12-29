@@ -173,11 +173,10 @@ pub mod tests {
     #[tokio::test]
     async fn users_test_in_order() {
         let auth0_id = Auth0Id::from("test".to_string());
-        let create_name = "test".to_string();
         let update_name = "test2".to_string();
 
         users_create_test(auth0_id.clone()).await;
-        users_find_test(auth0_id.clone(), Some(create_name)).await;
+        users_find_test(auth0_id.clone(), None).await;
         users_update_test(auth0_id.clone()).await;
         users_find_test(auth0_id.clone(), Some(update_name)).await;
         users_delete_test(auth0_id.clone()).await;
