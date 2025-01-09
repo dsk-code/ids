@@ -8,6 +8,7 @@ use shared::{ClassId, UserId};
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use tracing::{info, span, Level};
 
 #[derive(Debug, new, Deserialize, Serialize)]
 pub struct ClassesEntity {
@@ -47,9 +48,14 @@ impl ClassesRepository {
 
     /// クラスの作成（存在確認必要)
     pub async fn create(&self, input: InputClassEntity) -> Result<(), Error> {
+        let span = span!(Level::INFO, "db_query_execution", function = "create");
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("New class registration started");
+        let user_id = input.user_id.id();
+
+        info!("New class registration started");
         let res = sqlx::query!(
             r#"
                 INSERT INTO classes
@@ -58,14 +64,14 @@ impl ClassesRepository {
                     ($1, $2, $3)
                 ON CONFLICT DO NOTHING
             "#,
-            input.user_id.id(),
+            user_id,
             input.class_name,
             input.age
         )
         .execute(&pool)
         .await
         .map_err(Error::DatabaseError)?;
-        println!("Successful new class registration");
+        info!("Successful new class registration");
 
         // 重複していないかの確認
         if res.rows_affected() == 0 {
@@ -77,9 +83,16 @@ impl ClassesRepository {
 
     /// activeなクラスを検索
     pub async fn find_active_class(&self, input: UserId) -> Result<Vec<ClassesEntity>, Error> {
+        let span = span!(
+            Level::INFO,
+            "db_query_execution",
+            function = "find_active_class"
+        );
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("Start find ClassesEntity");
+        info!("Start find ClassesEntity");
         let classes = sqlx::query_as!(
             ClassesEntity,
             r#"
@@ -92,16 +105,23 @@ impl ClassesRepository {
         .fetch_all(&pool)
         .await
         .map_err(|e| Error::DatabaseError(e))?;
-        println!("Successful search for ClassesEntity");
+        info!("Successful search for ClassesEntity");
 
         Ok(classes)
     }
 
     /// すべてのクラスを検索
     pub async fn find_all_class(&self, input: UserId) -> Result<Vec<ClassesEntity>, Error> {
+        let span = span!(
+            Level::INFO,
+            "db_query_execution",
+            function = "find_all_class"
+        );
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("Start find ClassesEntity");
+        info!("Start find ClassesEntity");
         let classes = sqlx::query_as!(
             ClassesEntity,
             r#"
@@ -114,16 +134,23 @@ impl ClassesRepository {
         .fetch_all(&pool)
         .await
         .map_err(|e| Error::DatabaseError(e))?;
-        println!("Successful search for ClassesEntity");
+        info!("Successful search for ClassesEntity");
 
         Ok(classes)
     }
 
     /// class_nameの存在確認
     pub async fn find_validate_class_name(&self, input: InputClassEntity) -> Result<bool, Error> {
+        let span = span!(
+            Level::INFO,
+            "db_query_execution",
+            function = "find_validate_class_name"
+        );
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("Start validate class name");
+        info!("Start validate class name");
         let classes = sqlx::query_scalar!(
             r#"
                 SELECT EXISTS (
@@ -137,7 +164,7 @@ impl ClassesRepository {
         .fetch_one(&pool)
         .await
         .map_err(|e| Error::DatabaseError(e))?;
-        println!("Successful validate class name");
+        info!("Successful validate class name");
 
         match classes {
             Some(classes) => Ok(classes),
@@ -147,9 +174,16 @@ impl ClassesRepository {
 
     /// is_activeの更新
     pub async fn update_active(&self, input: InputUpdateClassEntity) -> Result<(), Error> {
+        let span = span!(
+            Level::INFO,
+            "db_query_execution",
+            function = "update_active"
+        );
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("Start updating is_active in the classes table");
+        info!("Start updating is_active in the classes table");
         sqlx::query!(
             r#"
                 UPDATE classes
@@ -163,15 +197,18 @@ impl ClassesRepository {
         .execute(&pool)
         .await
         .map_err(|e| Error::DatabaseError(e))?;
-        println!("Successfully updated is_active in classes table");
+        info!("Successfully updated is_active in classes table");
 
         Ok(())
     }
 
     pub async fn delete(&self, input: InputDeleteClassEntity) -> Result<(), Error> {
+        let span = span!(Level::INFO, "db_query_execution", function = "delete");
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("Start deleting the classes table");
+        info!("Start deleting the classes table");
         sqlx::query!(
             r#"
                 DELETE FROM classes WHERE id = $1 AND user_id = $2
@@ -182,7 +219,7 @@ impl ClassesRepository {
         .execute(&pool)
         .await
         .map_err(|e| Error::DatabaseError(e))?;
-        println!("Successfully deleted classes table");
+        info!("Successfully deleted classes table");
 
         Ok(())
     }

@@ -10,6 +10,8 @@ use tower_http::services::{ServeDir, ServeFile};
 //                 .not_found_service(ServeFile::new("frontend/dist/index.html")),
 //         )
 // }
+
+/// Rimix用
 pub fn static_roouter() -> Router {
     Router::new()
         .nest_service("/assets", ServeDir::new("frontend/build/client/assets"))

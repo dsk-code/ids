@@ -45,10 +45,8 @@ impl JWT {
         let mut validation = Validation::new(Algorithm::RS256);
         validation.set_audience(&[&secret.aud, &secret.aud2]);
         // validation.set_issuer(&[&secret.iss]);
-        println!("test");
         let token_data = decode::<Claims>(self.access_token(), &decoding_key, &validation)?;
 
-        println!("test2");
         Ok(token_data.claims)
     }
 }

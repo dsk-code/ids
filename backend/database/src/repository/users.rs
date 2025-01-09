@@ -7,6 +7,7 @@ use derive_new::new;
 use serde::{Deserialize, Serialize};
 use shared::{Auth0Id, UserId};
 use std::sync::Arc;
+use tracing::{info, span, Level};
 
 #[derive(Debug, new, Deserialize, Serialize)]
 pub struct UserEntity {
@@ -31,9 +32,12 @@ impl UserRepository {
     }
 
     pub async fn create(&self, input: InputUserEntity) -> Result<(), Error> {
+        let span = span!(Level::INFO, "db_query_execution", function = "create");
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("New user auth0_id registration started");
+        info!("New user auth0_id registration started");
         let res = sqlx::query!(
             r#"
                 INSERT INTO users
@@ -52,15 +56,18 @@ impl UserRepository {
         if res.rows_affected() == 0 {
             return Err(Error::AlreadyExsited("users".into()));
         }
-        println!("Successful new user auth0_id registration");
+        info!("Successful new user auth0_id registration");
 
         Ok(())
     }
 
     pub async fn find_by_id(&self, id: Auth0Id) -> Result<UserEntity, Error> {
+        let span = span!(Level::INFO, "db_query_execution", function = "find_by_id");
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("Start find UserEntity");
+        info!("Start find UserEntity");
         let user = sqlx::query_as!(
             UserEntity,
             r#"
@@ -73,15 +80,18 @@ impl UserRepository {
         .fetch_one(&pool)
         .await
         .map_err(|e| Error::DatabaseError(e))?;
-        println!("Successful search for UserEntity");
+        info!("Successful search for UserEntity");
 
         Ok(user)
     }
 
     pub async fn update(&self, input: InputUserEntity) -> Result<(), Error> {
+        let span = span!(Level::INFO, "db_query_execution", function = "update");
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("Start updating names and emails in the users table");
+        info!("Start updating names and emails in the users table");
         sqlx::query!(
             r#"
                 UPDATE users
@@ -95,15 +105,18 @@ impl UserRepository {
         .execute(&pool)
         .await
         .map_err(|e| Error::DatabaseError(e))?;
-        println!("Successfully updated name and email in users table");
+        info!("Successfully updated name and email in users table");
 
         Ok(())
     }
 
     pub async fn delete(&self, id: Auth0Id) -> Result<(), Error> {
+        let span = span!(Level::INFO, "db_query_execution", function = "delete");
+        let _enter = span.enter();
+
         let pool = self.0.get_pool();
 
-        println!("Start deleting the users table");
+        info!("Start deleting the users table");
         sqlx::query!(
             r#"
                 DELETE FROM users WHERE auth0_id = $1
@@ -113,7 +126,7 @@ impl UserRepository {
         .execute(&pool)
         .await
         .map_err(|e| Error::DatabaseError(e))?;
-        println!("Successfully deleted users table");
+        info!("Successfully deleted users table");
 
         Ok(())
     }

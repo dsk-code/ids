@@ -11,12 +11,13 @@ shuttle-runtime = { workspace = true }
 shuttle-shared-db = { workspace = true }
 sqlx = { workspace = true }
 tokio = { workspace = true }
-tower-http = { workspace = true }
 thiserror = { workspace = true }
 anyhow = { workspace = true }
 serde = { workspace = true }
 dotenvy = { workspace = true }
 envy = { workspace = true }
+tower-http = { workspace = true, features = [ "trace", "fs", "cors" ] }
+tracing = { workspace = true }
 
 ids_auth = { path = "../auth/" }
 ids_database = { path = "../database/" }
