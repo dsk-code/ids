@@ -166,6 +166,7 @@ impl ClassesRepository {
     }
 }
 
+// todo: テストを書く
 // #[cfg(test)]
 // pub mod tests {
 //     use super::*;
