@@ -1,0 +1,234 @@
+openapi: '3.0.3'
+info:
+    title: ids
+    version: '0.1.0'
+servers:
+  - url: api/v1
+
+paths:
+    /me:
+        post:
+            operationId: post-me
+            requestBody:
+                $ref: '#/components/requestBodies/PostMe'
+            responses:
+                '201':
+                    $ref: '#/components/responses/OkGetMe'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - me
+
+    /classes:
+        get:
+            operationId: get-classes
+            responses:
+                '200':
+                    $ref: '#/components/responses/OkGetClassesList'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - classes
+
+        post:
+            operationId: post-classes
+            requestBody:
+                $ref: '#/components/requestBodies/PostClasses'
+            responses:
+                '201':
+                    $ref: '#/components/responses/OkPostClasses'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - classes
+
+    /classes/{class_id}:
+        put:
+            operationId: put-class
+            parameters:
+                - $ref: '#/components/parameters/ClassId'
+            requestBody:
+                $ref: '#/components/requestBodies/PostClasses'
+            responses:
+                '201':
+                    $ref: '#/components/responses/OkPutClasses'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - classes
+
+        delete:
+            operationId: delete-class
+            parameters:
+                - $ref: '#/components/parameters/ClassId'
+            responses:
+                '204':
+                    description: The class has been successfully deleted
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - classes
+
+components:
+    schemas:
+        PagenationLimit:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 50
+
+        PagenationOffset:
+            type: integer
+
+        UserId:
+            type: string
+            format: uuid
+        
+        ClassId:
+            type: string
+            format: uuid
+
+        ResponseAuthUser:
+            type: object
+            properties:
+                id:
+                    $ref: '#/components/schemas/UserId'
+                auth0UserName:
+                    type: string
+            required:
+              - id
+              - auth0UserName
+
+        RequestAuthUser:
+            type: object
+            properties:
+                auth0UserName:
+                    type: string
+                auth0UserEmail:
+                    type: string
+            required:
+              - auth0UserName
+              - auth0UserEmail
+        
+        Class:
+            description: アクティブなクラス
+            properties:
+                id:
+                    $ref: '#/components/schemas/ClassId'
+                userId:
+                    $ref: '#/components/schemas/UserId'
+                className:
+                    type: string
+                age:
+                    type: integer
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+            required:
+              - id
+              - userId
+              - className
+              - age
+              - createdAt
+              - updatedAt
+
+        ClassList:
+            type: array
+            items:
+                $ref: '#/components/schemas/Class'
+
+        RequestClasses:
+            type: object
+            properties:
+                className:
+                    type: string
+                age:
+                    type: integer
+            required:
+              - className
+              - age
+   
+    parameters:
+        ClassId:
+            name: class_id
+            in: path
+            required: true
+            schema:
+                $ref: '#/components/schemas/ClassId'
+
+    requestBodies:
+        PostMe:
+            description: post me
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/RequestAuthUser'
+        
+        PostClasses:
+            description: post classes
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/RequestClasses'
+
+  
+    responses:
+        OkGetMe:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ResponseAuthUser'
+        
+        OkGetClassesList:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ClassList'
+        
+        OkPostClasses:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Class'
+        
+        OkPutClasses:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Class'
+
+        NotFound:
+            description: not found
+
+        Unauthorized:
+            description: unauthorized
+
+    securitySchemes:
+        token:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+
+security:
+- token: []
+tags:
+- name: api
