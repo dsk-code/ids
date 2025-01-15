@@ -74,7 +74,7 @@ command = "sqlx"
 args = ["migrate", "run", "--source", "./backend/database/migrations"]
 
 [tasks.sqlx-migrate-revert]
-# (注)ロールバック
+# ロールバック
 command = "sqlx"
 args = ["migrate", "revert", "--source", "./backend/database/migrations"]
 
