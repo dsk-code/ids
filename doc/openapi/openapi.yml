@@ -121,7 +121,6 @@ components:
               - auth0UserEmail
         
         Class:
-            description: アクティブなクラス
             properties:
                 id:
                     $ref: '#/components/schemas/ClassId'
