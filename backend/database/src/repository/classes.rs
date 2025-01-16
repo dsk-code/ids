@@ -5,11 +5,11 @@ use crate::DbConnector;
 
 use shared::{ClassId, UserId};
 
+use chrono::NaiveDateTime;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tracing::{info, span, Level};
-use chrono::NaiveDateTime;
 
 #[derive(Debug, new, Deserialize, Serialize)]
 pub struct ClassEntity {
@@ -21,16 +21,23 @@ pub struct ClassEntity {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Debug, new)]
+#[derive(Debug, new, Clone, PartialEq)]
 pub struct InputClassEntity {
+    pub id: ClassId,
     pub user_id: UserId,
     pub class_name: String,
     pub age: i32,
 }
 
 #[derive(Debug, new)]
+pub struct InputFindClassEntity {
+    pub id: ClassId,
+    pub user_id: UserId,
+}
+
+#[derive(Debug, new)]
 pub struct InputUpdateClassEntity {
-    pub class_id: ClassId,
+    pub id: ClassId,
     pub user_id: UserId,
     pub class_name: String,
     pub age: i32,
@@ -38,7 +45,7 @@ pub struct InputUpdateClassEntity {
 
 #[derive(Debug, new)]
 pub struct InputDeleteClassEntity {
-    pub class_id: ClassId,
+    pub id: ClassId,
     pub user_id: UserId,
 }
 
@@ -60,15 +67,16 @@ impl ClassesRepository {
         let user_id = input.user_id.id();
 
         info!("New class registration started");
-        let res = sqlx::query_as!(
+        let class = sqlx::query_as!(
             ClassEntity,
             r#"
                 INSERT INTO classes
-                    (user_id, class_name, age)
+                    (id, user_id, class_name, age)
                 VALUES
-                    ($1, $2, $3)
+                    ($1, $2, $3, $4)
                 RETURNING id, user_id, class_name, age, created_at, updated_at
             "#,
+            input.id.id(),
             user_id,
             input.class_name,
             input.age
@@ -78,8 +86,7 @@ impl ClassesRepository {
         .map_err(Error::DatabaseError)?;
         info!("Successful new class registration");
 
-
-        Ok(res)
+        Ok(class)
     }
 
     /// すべてのクラスを検索
@@ -93,7 +100,7 @@ impl ClassesRepository {
 
         let pool = self.0.get_pool();
 
-        info!("Start find ClassesEntity");
+        info!("Start find_all ClassesEntity");
         let classes = sqlx::query_as!(
             ClassEntity,
             r#"
@@ -111,12 +118,34 @@ impl ClassesRepository {
         Ok(classes)
     }
 
+    /// クラスを検索
+    pub async fn find_class(&self, input: InputFindClassEntity) -> Result<ClassEntity, Error> {
+        let span = span!(Level::INFO, "db_query_execution", function = "find_class");
+        let _enter = span.enter();
+
+        let pool = self.0.get_pool();
+
+        info!("Start find_class ClassesEntity");
+        let class = sqlx::query_as!(
+            ClassEntity,
+            r#"
+                    SELECT id, user_id, class_name, age, created_at, updated_at
+                    FROM classes
+                    WHERE id = $1 AND user_id = $2
+                "#,
+            input.id.id(),
+            input.user_id.id()
+        )
+        .fetch_one(&pool)
+        .await
+        .map_err(|e| Error::DatabaseError(e))?;
+        info!("Successful search for ClassesEntity");
+
+        Ok(class)
+    }
+
     pub async fn update(&self, input: InputUpdateClassEntity) -> Result<ClassEntity, Error> {
-        let span = span!(
-            Level::INFO,
-            "db_query_execution",
-            function = "update"
-        );
+        let span = span!(Level::INFO, "db_query_execution", function = "update");
         let _enter = span.enter();
 
         let pool = self.0.get_pool();
@@ -133,7 +162,7 @@ impl ClassesRepository {
             input.class_name,
             input.age,
             input.user_id.id(),
-            input.class_id.id()
+            input.id.id()
         )
         .fetch_one(&pool)
         .await
@@ -154,7 +183,7 @@ impl ClassesRepository {
             r#"
                 DELETE FROM classes WHERE id = $1 AND user_id = $2
             "#,
-            input.class_id.id(),
+            input.id.id(),
             input.user_id.id(),
         )
         .execute(&pool)
@@ -167,109 +196,146 @@ impl ClassesRepository {
 }
 
 // todo: テストを書く
-// #[cfg(test)]
-// pub mod tests {
-//     use super::*;
-//     use crate::{
-//         repository::users::tests::{users_create_test, users_delete_test, users_find_id},
-//         tests::util_init,
-//     };
-//     use ids_shared::Auth0Id;
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+    use crate::repository::users::InputUserEntity;
+    use crate::{
+        repository::users::tests::{users_create_test, users_delete_test, users_find_id},
+        tests::util_init,
+    };
 
-//     /// 作成テスト
-//     async fn classes_create_test() {
-//         let auth0_id = Auth0Id::from("test".to_string());
-//         let class_datas = vec![
-//             ("たまご", 0),
-//             ("ひよこ", 1),
-//             ("あひる", 2),
-//             ("うさぎ", 3),
-//             ("くま", 4),
-//             ("ぞう", 5),
-//         ];
+    use ids_shared::Auth0Id;
 
-//         users_create_test(auth0_id.clone()).await;
-//         let user = users_find_id(auth0_id.clone()).await;
-//         let repo = ClassesRepository(util_init().await.unwrap());
+    /// 作成テスト
+    async fn classes_create_test(input: InputClassEntity) {
+        let repo = ClassesRepository(util_init().await.unwrap());
+        let class = repo.create(input.clone()).await.unwrap();
 
-//         for class_data in class_datas {
-//             let input_class =
-//                 InputClassEntity::new(user.id.clone(), class_data.0.to_string(), class_data.1);
+        assert_eq!(
+            (input.user_id, input.class_name, input.age.clone()),
+            (class.user_id, class.class_name, class.age)
+        );
+    }
 
-//             let class = repo.create(input_class).await;
+    // 一覧検索の正常系テスト
+    async fn classes_find_all(user_id: UserId, expected: Vec<TestClassData>) {
+        let repo = ClassesRepository(util_init().await.unwrap());
 
-//             assert!(class.is_ok());
-//         }
-//     }
+        let classes = repo.find_all(user_id).await.unwrap();
 
-    // アクティブなクラスの検索の正常系テスト
-    // async fn classes_find_active() {
-    //     let auth0_id = Auth0Id::from("test".to_string());
-    //     let user = users_find_id(auth0_id.clone()).await;
-    //     let class_names = vec!["たまご", "ひよこ", "あひる", "うさぎ", "くま", "ぞう"];
+        for l in 0..classes.len() {
+            assert_eq!(
+                (expected[l].name.clone(), expected[l].age),
+                (classes[l].class_name.clone(), classes[l].age)
+            );
+        }
+    }
 
-    //     let repo = ClassesRepository(util_init().await.unwrap());
+    // クラス検索の正常系テスト
+    async fn classes_find_class(input: InputFindClassEntity, expected: TestClassData) {
+        let repo = ClassesRepository(util_init().await.unwrap());
 
-        // let classes = repo.find_active_class(user.id).await.unwrap();
+        let class = repo.find_class(input).await.unwrap();
 
-        // for l in 0..classes.len() {
-        //     assert_eq!(class_names[l].to_string(), classes[l].class_name);
-        // }
-    // }
+        assert_eq!(
+            (expected.id, expected.name, expected.age),
+            (class.id, class.class_name, class.age)
+        );
+    }
 
-    // クラスネームの重複確認、正常系テスト
-    // async fn classes_validate_class_name() {
-    //     let auth0_id = Auth0Id::from("test".to_string());
-    //     let user = users_find_id(auth0_id.clone()).await;
-    //     let class_data = ("ひよこ", 1);
+    // is_activeの更新、正常系テスト
+    async fn classes_update(input: InputUpdateClassEntity, expected: TestClassData) {
+        let repo = ClassesRepository(util_init().await.unwrap());
 
-    //     let repo = ClassesRepository(util_init().await.unwrap());
-    //     let input = InputClassEntity::new(user.id, class_data.0.to_string(), class_data.1);
+        let class = repo.update(input).await.unwrap();
 
-    //     let classe = repo.find_validate_class_name(input).await.unwrap();
-
-    //     assert!(classe);
-    // }
-
-    //is_activeの更新、正常系テスト
-    // async fn classes_update_active() {
-    //     let auth0_id = Auth0Id::from("test".to_string());
-    //     let user = users_find_id(auth0_id.clone()).await;
-    //     let class_data = ("ひよこ", 1);
-    //     let is_active = false;
-
-    //     let repo = ClassesRepository(util_init().await.unwrap());
-    //     let input =
-    //         InputUpdateClassEntity::new(user.id, class_data.0.to_string(), class_data.1, is_active);
-
-    //     let classe = repo.update_active(input).await;
-
-    //     assert!(classe.is_ok());
-    // }
+        assert_eq!(
+            (expected.id, expected.name, expected.age),
+            (class.id, class.class_name, class.age)
+        );
+    }
 
     // レコード削除、正常系テスト
-    // async fn classes_delete() {
-    //     let auth0_id = Auth0Id::from("test".to_string());
-    //     let user = users_find_id(auth0_id.clone()).await;
+    async fn classes_delete(input: InputDeleteClassEntity) {
+        let repo = ClassesRepository(util_init().await.unwrap());
 
-    //     let repo = ClassesRepository(util_init().await.unwrap());
-    //     let classes = repo.find_all_class(user.id.clone()).await.unwrap();
-    //     for class in classes {
-    //         let input = InputDeleteClassEntity::new(user.id.clone(), class.id);
-    //         let class_del = repo.delete(input).await;
+        let res = repo.delete(input).await;
 
-    //         assert!(class_del.is_ok());
-    //     }
-    //     users_delete_test(auth0_id.clone()).await;
-    // }
+        assert!(res.is_ok());
+    }
 
-    // /// classes reporitoryの正常系テスト
-    // #[tokio::test]
-    // async fn classes_test() {
-    //     classes_create_test().await;
-    //     // classes_find_active().await;
-    //     classes_validate_class_name().await;
-    //     // classes_update_active().await;
-    //     classes_delete().await;
-    // }
-// }
+    #[derive(Debug, Clone, new, PartialEq)]
+    pub struct TestUserDatas {
+        user_data: InputUserEntity,
+    }
+
+    #[derive(Debug, Clone, new, PartialEq)]
+    pub struct TestClassData {
+        id: ClassId,
+        name: String,
+        age: i32,
+    }
+
+    /// classes reporitoryの正常系テスト
+    #[tokio::test]
+    async fn classes_test() {
+        let auth0_id = Auth0Id::from("test".to_string());
+        let auth0_user_name = "test".to_string();
+        let auth0_user_email = "test@test.com".to_string();
+        let datas = [
+            (ClassId::new_v4(), "たまご", 0),
+            (ClassId::new_v4(), "ひよこ", 1),
+            (ClassId::new_v4(), "あひる", 2),
+            (ClassId::new_v4(), "うさぎ", 3),
+            (ClassId::new_v4(), "くま", 4),
+            (ClassId::new_v4(), "ぞう", 5),
+        ];
+
+        let input_user = InputUserEntity::new(
+            auth0_id.clone(),
+            Some(auth0_user_name),
+            Some(auth0_user_email),
+        );
+
+        let class_datas: Vec<TestClassData> = datas
+            .clone()
+            .into_iter()
+            .map(|(id, name, age)| TestClassData::new(id, name.to_string(), age))
+            .collect();
+
+        let update_test_class = TestClassData::new(class_datas[2].id.clone(), "たけし".to_string(), 15);
+
+        users_create_test(input_user).await;
+        let user = users_find_id(auth0_id.clone()).await;
+
+        let input_update = InputUpdateClassEntity::new(
+            update_test_class.id.clone(),
+            user.id.clone(),
+            update_test_class.name.clone(),
+            update_test_class.age.clone(),
+        );
+
+        let input_find = InputFindClassEntity::new(update_test_class.id.clone(), user.id.clone());
+
+        let input_delete =
+            InputDeleteClassEntity::new(update_test_class.id.clone(), user.id.clone());
+
+        for class_data in class_datas.clone() {
+            let input_class = InputClassEntity::new(
+                class_data.id,
+                user.id.clone(),
+                class_data.name,
+                class_data.age,
+            );
+
+            classes_create_test(input_class).await;
+        }
+
+        classes_find_all(user.id.clone(), class_datas.clone()).await;
+        classes_update(input_update, update_test_class.clone()).await;
+        classes_find_class(input_find, update_test_class.clone()).await;
+        classes_delete(input_delete).await;
+        users_delete_test(auth0_id.clone()).await;
+    }
+}
