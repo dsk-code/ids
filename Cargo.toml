@@ -39,3 +39,5 @@ envy = "0.4.2"
 url = "2.5.2"
 tracing = "0.1.40"
 
+# test
+test-auth0 = {git = "https://github.com/dsk-code/test-auth0.git", rev = "671fa25c98a8e0ce9da6d651b48aa4d895441649"}

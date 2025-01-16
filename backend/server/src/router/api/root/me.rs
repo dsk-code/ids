@@ -2,7 +2,7 @@ use ids_database as db;
 
 use crate::error::Error;
 use crate::model::{
-    auth_user::AuthUser, request_body::RequestAuthUser, response::ResponseAuthUser,
+    auth_user::AuthUser, request_bodies::me::RequestAuthUser, responses::me::ResponseAuthUser,
 };
 use crate::State;
 

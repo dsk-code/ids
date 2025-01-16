@@ -1,3 +1,3 @@
 pub mod auth_user;
-pub mod request_body;
-pub mod response;
+pub mod request_bodies;
+pub mod responses;
