@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct UserId(Uuid);
 
 impl From<Uuid> for UserId {
@@ -20,7 +20,7 @@ impl UserId {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct Auth0Id(String);
 
 impl From<String> for Auth0Id {
@@ -35,7 +35,7 @@ impl Auth0Id {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct ClassId(Uuid);
 
 impl From<Uuid> for ClassId {

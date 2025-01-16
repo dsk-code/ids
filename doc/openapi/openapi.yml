@@ -49,6 +49,19 @@ paths:
               - classes
 
     /classes/{class_id}:
+        get:
+            operationId: get-class
+            parameters:
+                - $ref: '#/components/parameters/ClassId'
+            responses:
+                '200':
+                    $ref: '#/components/responses/OkGetClass'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - classes
         put:
             operationId: put-class
             parameters:
@@ -121,7 +134,6 @@ components:
               - auth0UserEmail
         
         Class:
-            description: アクティブなクラス
             properties:
                 id:
                     $ref: '#/components/schemas/ClassId'
@@ -203,6 +215,13 @@ components:
                         $ref: '#/components/schemas/ClassList'
         
         OkPostClasses:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Class'
+        
+        OkGetClass:
             description: OK
             content:
                 application/json:

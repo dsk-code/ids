@@ -16,7 +16,7 @@ pub struct UserEntity {
     pub auth0_user_email: Option<String>,
 }
 
-#[derive(Debug, new, Clone)]
+#[derive(Debug, new, Clone, PartialEq)]
 pub struct InputUserEntity {
     pub auth0_id: Auth0Id,
     pub auth0_user_name: Option<String>,
@@ -138,23 +138,19 @@ pub mod tests {
 
     use super::*;
 
-    pub async fn users_create_test(auth0_id: Auth0Id) {
+    pub async fn users_create_test(input: InputUserEntity) {
         let repo = UserRepository(util_init().await.unwrap());
-        let auth0_user_name = "test".to_string();
-        let auth0_user_email = "test@test.com".to_string();
 
-        let user_entity =
-            InputUserEntity::new(auth0_id, Some(auth0_user_name), Some(auth0_user_email));
-        let user = repo.create(user_entity).await;
+        let user = repo.create(input).await;
 
         assert!(user.is_ok());
     }
 
-    async fn users_find_test(auth0_id: Auth0Id, expected: Option<String>) {
+    async fn users_find_test(input: InputUserEntity, expected_name: Option<String>) {
         let repo = UserRepository(util_init().await.unwrap());
-        let user = repo.find_by_id(auth0_id).await.unwrap();
+        let user = repo.find_by_id(input.auth0_id).await.unwrap();
 
-        assert_eq!(expected, user.auth0_user_name);
+        assert_eq!(expected_name, user.auth0_user_name);
     }
 
     pub async fn users_find_id(auth0_id: Auth0Id) -> UserEntity {
@@ -164,13 +160,10 @@ pub mod tests {
         user
     }
 
-    async fn users_update_test(auth0_id: Auth0Id) {
-        let update_name = "test2".to_string();
-        let update_email = "test2@test2.com".to_string();
+    async fn users_update_test(input: InputUserEntity) {
         let repo = UserRepository(util_init().await.unwrap());
-        let input = InputUserEntity::new(auth0_id, Some(update_name.clone()), Some(update_email));
 
-        let user = repo.update(input.clone()).await;
+        let user = repo.update(input).await;
 
         assert!(user.is_ok());
     }
@@ -186,12 +179,26 @@ pub mod tests {
     #[tokio::test]
     async fn users_test_in_order() {
         let auth0_id = Auth0Id::from("test".to_string());
+        let auth0_user_name = "test".to_string();
+        let auth0_user_email = "test@test.com".to_string();
         let update_name = "test2".to_string();
+        let update_email = "test2@test2.com".to_string();
 
-        users_create_test(auth0_id.clone()).await;
-        users_find_test(auth0_id.clone(), None).await;
-        users_update_test(auth0_id.clone()).await;
-        users_find_test(auth0_id.clone(), Some(update_name)).await;
+        let input = InputUserEntity::new(
+            auth0_id.clone(),
+            Some(auth0_user_name),
+            Some(auth0_user_email),
+        );
+        let update_input = InputUserEntity::new(
+            auth0_id.clone(),
+            Some(update_name.clone()),
+            Some(update_email),
+        );
+
+        users_create_test(input.clone()).await;
+        users_find_test(input.clone(), None).await;
+        users_update_test(update_input).await;
+        users_find_test(input.clone(), Some(update_name)).await;
         users_delete_test(auth0_id.clone()).await;
     }
 }
