@@ -304,7 +304,8 @@ pub mod tests {
             .map(|(id, name, age)| TestClassData::new(id, name.to_string(), age))
             .collect();
 
-        let update_test_class = TestClassData::new(class_datas[2].id.clone(), "たけし".to_string(), 15);
+        let update_test_class =
+            TestClassData::new(class_datas[2].id.clone(), "たけし".to_string(), 15);
 
         users_create_test(input_user).await;
         let user = users_find_id(auth0_id.clone()).await;
