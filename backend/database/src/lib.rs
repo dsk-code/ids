@@ -2,6 +2,10 @@ pub mod error;
 pub mod repository;
 pub mod types;
 
+pub use repository::classes::{
+    ClassEntity, InputClassEntity, InputDeleteClassEntity, InputFindClassEntity,
+    InputUpdateClassEntity,
+};
 pub use repository::users::{InputUserEntity, UserEntity, UserRepository};
 
 use error::Error;
