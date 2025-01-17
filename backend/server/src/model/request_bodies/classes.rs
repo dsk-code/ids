@@ -6,8 +6,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct RequestPostClass {
-    pub id: ClassId,
-    pub user_id: UserId,
     pub class_name: String,
     pub age: i32,
 }

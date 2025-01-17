@@ -11,7 +11,8 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tracing::{info, span, Level};
 
-#[derive(Debug, new, Deserialize, Serialize)]
+#[derive(Debug, new, Deserialize, Serialize, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct ClassEntity {
     pub id: ClassId,
     pub user_id: UserId,
@@ -21,7 +22,8 @@ pub struct ClassEntity {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Debug, new, Clone, PartialEq)]
+#[derive(Debug, new, Deserialize, Serialize, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct InputClassEntity {
     pub id: ClassId,
     pub user_id: UserId,
