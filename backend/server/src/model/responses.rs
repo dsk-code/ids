@@ -1,4 +1,5 @@
 pub mod me;
+pub mod classes;
 
 // use ids_database::UserEntity;
 // use ids_shared::UserId;
