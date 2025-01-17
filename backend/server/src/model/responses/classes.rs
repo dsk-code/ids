@@ -1,7 +1,7 @@
-use ids_shared::{UserId, ClassId};
+use ids_shared::{ClassId, UserId};
 
-use serde::{Deserialize, Serialize};
 use chrono::NaiveDateTime;
+use serde::{Deserialize, Serialize};
 
 /// api/v1/classes のレスポンス構造体
 /// api/v1/classes/:class_id のレスポンス構造体

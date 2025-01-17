@@ -1,5 +1,5 @@
-pub mod me;
 pub mod classes;
+pub mod me;
 
 // use serde::{Deserialize, Serialize};
 

@@ -1,4 +1,4 @@
-use ids_shared::{UserId, ClassId};
+use ids_shared::{ClassId, UserId};
 
 use serde::{Deserialize, Serialize};
 
