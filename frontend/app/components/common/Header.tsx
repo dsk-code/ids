@@ -14,7 +14,7 @@ export default function Header() {
             </div>
             <div className="flex flex-row items-center gap-5 mt-5 sm:justify-end sm:mt-0 sm:ps-5">
               <Link to="/dashboard/test1" className="font-medium text-blue-500 select-none">Test1</Link>
-              <a className="font-medium text-gray-600 hover:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 select-none" href="#">Account</a>
+              <Link to="/dashboard/test2" className="font-medium text-blue-500 select-none">Test2</Link>
               <a className="font-medium text-gray-600 hover:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 select-none" href="#">Work</a>
               <Auth0NavButtons />
             </div>

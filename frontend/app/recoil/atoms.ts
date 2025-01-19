@@ -1,6 +1,6 @@
 import { atom } from "recoil";
 import { User, ResponseAuthUser } from "../types/userTypes";
-import { Class } from "../types/classTypes";
+import { Class, RequestPostClass } from "../types/classTypes";
 
 export const userState = atom<User []>({
     key: "userState",
@@ -16,6 +16,14 @@ export const authUserState = atom<ResponseAuthUser>({
     key: "authUserState",
     default: {
         id: "",
-        userName: "",
+        auth0UserName: "",
+    },
+})
+
+export const RequestPostClassState = atom<RequestPostClass>({
+    key: "RequestPostClassState",
+    default: {
+        className: "",
+        age: 0
     },
 })
