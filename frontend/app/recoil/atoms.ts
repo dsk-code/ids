@@ -12,6 +12,11 @@ export const classState = atom<Class []>({
     default: [],
 })
 
+export const classListState = atom<Class []>({
+    key: "classListState",
+    default: [],
+})
+
 export const authUserState = atom<ResponseAuthUser>({
     key: "authUserState",
     default: {
@@ -27,3 +32,8 @@ export const RequestPostClassState = atom<RequestPostClass>({
         age: 0
     },
 })
+
+export const accessTokenState = atom<string>({
+    key: 'accessTokenState',  // ユニークなID
+    default: "",  // 初期値
+});

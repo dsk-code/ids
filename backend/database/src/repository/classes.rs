@@ -109,6 +109,7 @@ impl ClassesRepository {
                     SELECT id, user_id, class_name, age, created_at, updated_at
                     FROM classes
                     WHERE user_id = $1
+                    ORDER BY age ASC
                 "#,
             input.id(),
         )

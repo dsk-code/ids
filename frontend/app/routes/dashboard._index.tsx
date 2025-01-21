@@ -10,7 +10,7 @@ export default function Dashboard() {
     // https://auth0.com/docs/quickstart/spa/react/02-calling-an-api
     const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [authUser, setAuthUser] = useRecoilState(authUserState);
-    const { audience } = useEnv();
+    const { audience, backendApiUrl } = useEnv();
     
     useEffect(() => {
         if (user) {
@@ -24,12 +24,14 @@ export default function Dashboard() {
 
             try {
                 // アクセストークンの取得
-                console.log("リクエスト開始");
+                console.log("アクセストークンのリクエスト開始");
                 const accessToken = await getAccessTokenSilently({
                     authorizationParams: {
                         audience: audience,
                     },
                 });
+
+                console.log(accessToken);
                 
                 const payload: AuthUser = {
                     auth0UserName: user.name || "",
@@ -37,10 +39,9 @@ export default function Dashboard() {
                 };
         
                 // APIにPOSTリクエスト
-                console.log("リクエスト開始");
+                console.log("ユーザーデータのリクエスト開始");
                 const response = await postData<ResponseAuthUser>(
-                    "http://127.0.0.1:8000/api/v1/me",
-                    // "https://ids.shuttleapp.rs/api/v1/me",
+                    `${backendApiUrl}/me`,
                     payload,
                     accessToken
                 );

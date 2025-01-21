@@ -25,7 +25,7 @@ export const Auth0ProviderWithNavigate: React.FC<Auth0ProviderWithNavigateProps>
         scope: scope
         }}
         // cookieDomain={appDmain}  // ドメインを設定
-        // cacheLocation="localstorage" // Cookieの代わりにLocal Storageを使用
+        cacheLocation="localstorage" // Cookieの代わりにLocal Storageを使用
         >
     {children}
     </Auth0Provider>

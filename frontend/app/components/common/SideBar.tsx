@@ -20,7 +20,7 @@ interface Menu {
 }
 
 interface SubmenuItem {
-    id: number;
+    id: string;
     title?: string;
 }
 
@@ -49,12 +49,12 @@ export default function SideBar() {
         submenu: false,
         link: "/dashboard"
     }
-    const menu2_submenuItems: SubmenuItem[] = [{id: 0, title: "全園児"}];
+    const menu2_submenuItems: SubmenuItem[] = [{id: "0", title: "全園児"}];
     classList.forEach(cls => {
-        if (cls.class_name) {
+        if (cls.className) {
             const sumenuItem: SubmenuItem = {
-                id: cls.class_id,
-                title: cls.class_name
+                id: cls.id,
+                title: cls.className
             };
             menu2_submenuItems.push(sumenuItem);
         }
