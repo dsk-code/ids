@@ -32,19 +32,19 @@ args = ["shuttle", "project", "restart"]
 # ******************* frontend *******************
 [tasks.front_dev]
 description = "Run 'pnpm run dev' in the frontend directory"
-command = "npm"
+command = "pnpm"
 args = ["run", "dev"]
 cwd = "./frontend"
 
 [tasks.front_build]
 description = "Run 'pnpm run build' in the frontend directory"
-command = "npm"
+command = "pnpm"
 args = ["run", "build"]
 cwd = "./frontend"
 
 [tasks.front_preview]
 description = "Run 'pnpm run preview' in the frontend directory"
-command = "npm"
+command = "pnpm"
 args = ["run", "preview"]
 cwd = "./frontend"
 

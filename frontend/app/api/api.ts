@@ -5,6 +5,25 @@
 //     message?: string;
 //   }
   
+export const getData = async <T>(
+    url: string,
+    token: string
+): Promise<T> => {
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 認証トークン
+        },
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+  
+    return response.json();
+};
+
 export const postData = async <T>(
     url: string,
     data: object,

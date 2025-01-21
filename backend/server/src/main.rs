@@ -39,9 +39,9 @@ async fn main(
                     req.method(),
                     req.uri(),
                     req.version(),
-                    req.headers().get("host").unwrap(),
-                    req.headers().get("content-type").unwrap(),
-                    req.headers().get("content-length").unwrap()
+                    req.headers().get("host"),
+                    req.headers().get("content-type"),
+                    req.headers().get("content-length")
                 );
             })
             .on_response(|res: &Response<_>, _latency: Duration, _span: &Span| {

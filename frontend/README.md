@@ -49,3 +49,14 @@ npx sirv-cli build/client/ --single
 ## Styling
 
 This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+
+### Mantine
+#### 環境構築
+Rimixは廃止されたらしく、React Routerのガイドを参考するみたい 2025/01/20
+https://mantine.dev/guides/react-router/
+
+```bash
+$ npm install @mantine/core @mantine/hooks @mantine/form @mantine/dates dayjs @mantine/notifications @mantine/code-highlight @mantine/tiptap @tiptap/pm @tiptap/react @tiptap/extension-link @tiptap/starter-kit @mantine/dropzone @mantine/carousel embla-carousel-react@^7.1.0 @mantine/spotlight @mantine/modals @mantine/nprogress
+```
+参考
+https://azukiazusa.dev/blog/remix-spa-mode/

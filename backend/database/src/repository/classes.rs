@@ -11,7 +11,8 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tracing::{info, span, Level};
 
-#[derive(Debug, new, Deserialize, Serialize)]
+#[derive(Debug, new, Deserialize, Serialize, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct ClassEntity {
     pub id: ClassId,
     pub user_id: UserId,
@@ -21,7 +22,8 @@ pub struct ClassEntity {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Debug, new, Clone, PartialEq)]
+#[derive(Debug, new, Deserialize, Serialize, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct InputClassEntity {
     pub id: ClassId,
     pub user_id: UserId,
@@ -107,6 +109,7 @@ impl ClassesRepository {
                     SELECT id, user_id, class_name, age, created_at, updated_at
                     FROM classes
                     WHERE user_id = $1
+                    ORDER BY age ASC
                 "#,
             input.id(),
         )
@@ -304,7 +307,8 @@ pub mod tests {
             .map(|(id, name, age)| TestClassData::new(id, name.to_string(), age))
             .collect();
 
-        let update_test_class = TestClassData::new(class_datas[2].id.clone(), "たけし".to_string(), 15);
+        let update_test_class =
+            TestClassData::new(class_datas[2].id.clone(), "たけし".to_string(), 15);
 
         users_create_test(input_user).await;
         let user = users_find_id(auth0_id.clone()).await;

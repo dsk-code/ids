@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS classes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- 主キー
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- 外部キー制約
-    class_name TEXT NOT NULL UNIQUE, -- クラス名
+    class_name TEXT NOT NULL, -- クラス名
     age INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 作成日時
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP -- 更新日時
