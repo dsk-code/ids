@@ -12,8 +12,6 @@ thiserror = { workspace = true }
 derive-new ={ workspace = true }
 uuid = { workspace = true }
 fake = { workspace = true }
-argon2 = { workspace = true }
-password-hash = { workspace = true }
 serde = { workspace = true }
 dotenvy = { workspace = true }
 envy = { workspace = true }

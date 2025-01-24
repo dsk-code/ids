@@ -15,22 +15,20 @@ edition = "2021"
 rust-version = "1.76"
 
 [workspace.dependencies]
-axum-extra = "0.9.6"
+axum-extra = {version = "0.10.0", features = ["typed-header"]}
 uuid = {version = "1.11.0", features = ["v4", "serde"]}
-axum = "0.7.4"
+axum = "0.8.1"
 axum-macros = "0.5.0"
-shuttle-axum = "0.47.0"
-shuttle-runtime = "0.47.0"
-shuttle-shared-db = { version = "0.47.0", features = ["postgres", "sqlx"] }
-sqlx = { version = "0.7.4", features = ["runtime-tokio", "postgres", "macros", "migrate", "uuid", "chrono"] }
+shuttle-axum = "0.51.0"
+shuttle-runtime = "0.51.0"
+shuttle-shared-db = { version = "0.51.0", features = ["postgres", "sqlx"] }
+sqlx = { version = "0.8.3", features = ["runtime-tokio", "postgres", "macros", "migrate", "uuid", "chrono"] }
 tower-http = {version = "0.6.2", features = ["fs", "cors"]}
-thiserror = "1.0.63"
+thiserror = "2.0.11"
 anyhow = "1.0.86"
 serde = {version = "1.0.0", features = ["derive"]}
 derive-new = "0.6.0"
 fake = "2.9.2"
-argon2 = "0.5.3"
-password-hash = "0.5.0"
 jsonwebtoken = "9.3.0"
 chrono  = "0.4.37"
 reqwest = { version = "0.12.7", features = ["json"] }

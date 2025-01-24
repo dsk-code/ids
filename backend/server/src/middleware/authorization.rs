@@ -7,7 +7,7 @@ use crate::State;
 
 use db::InputUserEntity;
 
-use axum::async_trait;
+// use axum::async_trait;
 use axum::extract::{FromRef, FromRequestParts, Request};
 use axum::http::request::Parts;
 use axum::{middleware::Next, response::Response, Extension, RequestPartsExt};
@@ -41,7 +41,7 @@ pub async fn authorization_middleware(
     Ok(next.run(request).await)
 }
 
-#[async_trait]
+// #[async_trait]
 impl<S> FromRequestParts<S> for AuthUser
 where
     Arc<State>: FromRef<S>,
