@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                DELETE FROM classes WHERE id = $1::UUID AND user_id = $2::UUID\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "11a9996a52eff69cfc9298831fbf56653a11ad845d79625bfeffac10be02954b"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE users\n                SET auth0_user_name = $1, auth0_user_email = $2\n                WHERE auth0_id = $3\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ab2060dbed8ba040d36a282c337ae68dc6e6ffc1378dac67e55c12c8190bb685"
+}
