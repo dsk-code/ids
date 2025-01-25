@@ -16,7 +16,7 @@ export default function ClassCreateForm() {
         mode: 'uncontrolled',
         initialValues: {
             className: "",
-            age: "",
+            age: "0",
         }
     });
 
