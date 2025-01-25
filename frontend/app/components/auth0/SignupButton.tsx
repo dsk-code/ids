@@ -13,9 +13,9 @@ export const SignupButton: React.FC = () => {
   };
 
   return (
-    <button className="px-6 py-2 bg-theme font-bold rounded-lg hover:bg-purple-600 
+    <button className="px-1 py-2 bg-black font-bold rounded-lg hover:bg-gray-500
         transition-all duration-300" onClick={handleSignUp}>
-      Sign Up
+      サインアップ
     </button>
   );
 };

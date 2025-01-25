@@ -34,7 +34,8 @@ impl DbConnector {
     }
 }
 
-pub async fn init(pool: PgPool) -> Result<DbConnector, Error> {
+pub async fn init(url: String) -> Result<DbConnector, Error> {
+    let pool = PgPool::connect(&url).await?;
     let db = DbConnector::new(pool);
     db.migration().await?;
 
@@ -58,8 +59,8 @@ pub mod tests {
         dotenvy::dotenv().ok();
         let config = envy::from_env::<Config>().unwrap();
 
-        let pool = PgPool::connect(&config.database_url).await.unwrap();
-        let db = init(pool).await.unwrap();
+        // let pool = PgPool::connect(&config.database_url).await.unwrap();
+        let db = init(config.database_url).await.unwrap();
 
         Ok(Arc::new(db))
     }

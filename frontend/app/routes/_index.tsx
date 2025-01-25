@@ -14,12 +14,12 @@ export default function Index() {
         <header className='py-6'>
             <div className='container mx-auto flex justify-between items-center px-8 md:px-14'>
                 <div className='text-3xl font-bold'>IDS</div>
-                <div className='space-x-12 hidden md:flex items-center z-30'>
+                <div className='space-x-12 md:flex items-center z-30'>
                     <Auth0NavButtons /> 
                 </div>
-                <div className='md:hidden'>
+                {/* <div className='md:hidden'>
                     <i className="fa-solid fa-bars"></i>
-                </div>
+                </div> */}
             </div>
         </header>
 

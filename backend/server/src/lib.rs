@@ -9,20 +9,35 @@ pub mod router;
 use ids_auth::{key_init, types::KeyInitConfig};
 
 use error::Error;
-use shuttle_runtime::SecretStore;
-use sqlx::PgPool;
+use serde::Deserialize;
 use std::sync::Arc;
+
+#[derive(Deserialize, Clone)]
+pub struct Config {
+    pub database_url: String,
+    pub access_token_url: String,
+    pub management_api_client_id: String,
+    pub management_api_client_secret: String,
+    pub management_api_audience: String,
+    pub jwks_url: String,
+    pub kid: String,
+    pub aud: String,
+    pub aud2: String,
+    pub iss: String,
+    pub cors_url_1: String,
+    pub cors_url_2: String,
+}
 
 pub struct State {
     db: Arc<DbConnector>,
-    secret_store: SecretStore,
+    secrets: Config,
 }
 
 impl State {
-    pub fn new(db: DbConnector, secret_store: SecretStore) -> Self {
+    pub fn new(db: DbConnector, secrets: Config) -> Self {
         Self {
             db: Arc::new(db),
-            secret_store,
+            secrets,
         }
     }
 
@@ -31,30 +46,20 @@ impl State {
     }
 }
 
-pub async fn init(secret_store: SecretStore, pool: PgPool) -> Result<State, Error> {
+pub async fn init(secrets: Config) -> Result<State, Error> {
     let auth_secret = KeyInitConfig {
-        access_token_url: secret_store
-            .get("ACCESS_TOKEN_URL")
-            .ok_or(error::Error::NotFoundSecrets("ACCESS_TOKEN_URL".into()))?,
-        management_api_client_id: secret_store.get("MANAGEMENT_API_CLIENT_ID").ok_or(
-            error::Error::NotFoundSecrets("MANAGEMENT_API_CLIENT_ID".into()),
-        )?,
-        management_api_client_secret: secret_store.get("MANAGEMENT_API_CLIENT_SECRET").ok_or(
-            error::Error::NotFoundSecrets("MANAGEMENT_API_CLIENT_SECRET".into()),
-        )?,
-        management_api_audience: secret_store.get("MANAGEMENT_API_AUDIENCE").ok_or(
-            error::Error::NotFoundSecrets("MANAGEMENT_API_AUDIENCE".into()),
-        )?,
-        jwks_url: secret_store
-            .get("JWKS_URL")
-            .ok_or(error::Error::NotFoundSecrets("JWKS_URL".into()))?,
+        access_token_url: secrets.access_token_url.clone(),
+        management_api_client_id: secrets.management_api_client_id.clone(),
+        management_api_client_secret: secrets.management_api_client_secret.clone(),
+        management_api_audience: secrets.management_api_audience.clone(),
+        jwks_url: secrets.jwks_url.clone(),
     };
 
     key_init(&auth_secret).await?;
 
-    let db_connector = ids_database::init(pool).await?;
+    let db_connector = ids_database::init(secrets.database_url.clone()).await?;
 
-    let db = State::new(db_connector, secret_store);
+    let db = State::new(db_connector, secrets);
 
     Ok(db)
 }
@@ -93,8 +98,6 @@ pub mod tests {
     }
 
     pub async fn init_util(config: Config) -> Result<TestState, Error> {
-        let pool = PgPool::connect(&config.database_url).await.unwrap();
-
         let auth_secret = KeyInitConfig {
             access_token_url: config.access_token_url.clone(),
             management_api_client_id: config.management_api_client_id.clone(),
@@ -105,7 +108,7 @@ pub mod tests {
 
         key_init(&auth_secret).await?;
 
-        let db_connector = ids_database::init(pool).await?;
+        let db_connector = ids_database::init(config.database_url.clone()).await?;
 
         let db = TestState::new(db_connector, config.clone());
 

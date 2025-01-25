@@ -1,25 +1,26 @@
-use ids_server as server;
+use ids_server::{self as server, error};
+
+use crate::server::{error::Error, Config};
 
 use anyhow::Context as _;
 use axum::{extract::Request, http::HeaderValue, response::Response, Router};
-use shuttle_runtime::SecretStore;
 use sqlx::types::Uuid;
 use std::{sync::Arc, time::Duration};
-use tower_http::{
-    cors::{Any, CorsLayer},
-    trace::TraceLayer,
-};
+use tower_http::{cors::Any, cors::CorsLayer, trace::TraceLayer};
 use tracing::{Level, Span};
 
-#[shuttle_runtime::main]
-async fn main(
-    // #[shuttle_shared_db::Postgres(local_uri = "{secrets.DATABASE_URL}")] pool: sqlx::PgPool,
-    #[shuttle_shared_db::Postgres] pool: sqlx::PgPool,
-    #[shuttle_runtime::Secrets] secrets: SecretStore,
-) -> shuttle_axum::ShuttleAxum {
-    let state = server::init(secrets.clone(), pool)
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO) // INFO レベル以上のログを出力
+        .init();
+
+    dotenvy::dotenv().ok();
+    let secrets = envy::from_env::<Config>()?;
+
+    let state = server::init(secrets.clone())
         .await
-        .context("failed to init")?;
+        .context("failed to init").map_err(|err| server::error::Error::InitError(err))?;
     let state = Arc::new(state);
 
     let api = server::router::api::api(state.clone()).layer(
@@ -52,15 +53,13 @@ async fn main(
 
     let origins = [
         secrets
-            .get("CORS_URL_1")
-            .expect("REASON")
+            .cors_url_1
             .parse::<HeaderValue>()
-            .unwrap(),
+            .map_err(|err| error::Error::InvalidHeaderValue(err.to_string()))?,
         secrets
-            .get("CORS_URL_2")
-            .expect("REASON")
+            .cors_url_2
             .parse::<HeaderValue>()
-            .unwrap(),
+            .map_err(|err| error::Error::InvalidHeaderValue(err.to_string()))?,
     ];
 
     let router = Router::new()
@@ -68,5 +67,9 @@ async fn main(
         .nest("/api/v1", api)
         .layer(CorsLayer::new().allow_origin(origins).allow_methods(Any));
 
-    Ok(router.into())
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:8000").await.unwrap();
+    println!("listening on http://{}", listener.local_addr().unwrap());
+    axum::serve(listener, router).await.unwrap();
+
+    Ok(())
 }

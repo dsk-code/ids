@@ -134,7 +134,7 @@ impl ClassesRepository {
             r#"
                     SELECT id, user_id, class_name, age, created_at, updated_at
                     FROM classes
-                    WHERE id = $1 AND user_id = $2
+                    WHERE id = $1::UUID AND user_id = $2::UUID
                 "#,
             input.id.id(),
             input.user_id.id()
@@ -159,7 +159,7 @@ impl ClassesRepository {
             r#"
                 UPDATE classes
                 SET class_name = $1, age = $2
-                WHERE user_id = $3 AND id = $4
+                WHERE user_id = $3::UUID AND id = $4::UUID
                 RETURNING id, user_id, class_name, age, created_at, updated_at
             "#,
             input.class_name,
@@ -184,7 +184,7 @@ impl ClassesRepository {
         info!("Start deleting the classes table");
         sqlx::query!(
             r#"
-                DELETE FROM classes WHERE id = $1 AND user_id = $2
+                DELETE FROM classes WHERE id = $1::UUID AND user_id = $2::UUID
             "#,
             input.id.id(),
             input.user_id.id(),

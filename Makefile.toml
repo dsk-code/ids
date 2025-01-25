@@ -6,11 +6,24 @@ default_to_workspace = false
 command = "cargo"
 args = ["fmt"]
 
+[tasks.db_up]
+command = "docker"
+args = [ "compose", "up", "-d", "db" ]
+
+[tasks.db_down]
+command = "docker"
+args = [ "compose", "down", "db" ]
+
 [tasks.run]
-description = "Run 'cargo shuttle run'"
 command = "cargo"
-args = ["shuttle", "run"]
-dependencies = ["fmt"]
+dependencies = ["db_up"]
+args = [ "run", "-p", "ids_server" ]
+
+# [tasks.run]
+# description = "Run 'cargo shuttle run'"
+# command = "cargo"
+# args = ["shuttle", "run"]
+# dependencies = ["fmt"]
 
 [tasks.test_serial]
 description = "Run tests in order"
@@ -18,15 +31,15 @@ command = "cargo"
 args = ["test", "--", "--test-threads=1"]
 
 
-[tasks.deploy]
-description = "Run 'cargo shuttle deploy'"
-command = "cargo"
-args = ["shuttle", "deploy"]
+# [tasks.deploy]
+# description = "Run 'cargo shuttle deploy'"
+# command = "cargo"
+# args = ["shuttle", "deploy"]
 
-[tasks.project_restart]
-description = "Run 'cargo project restart'"
-command = "cargo"
-args = ["shuttle", "project", "restart"]
+# [tasks.project_restart]
+# description = "Run 'cargo project restart'"
+# command = "cargo"
+# args = ["shuttle", "project", "restart"]
 
 
 # ******************* frontend *******************
@@ -59,21 +72,21 @@ cwd = "./frontend"
 
 # ******************* sqlx-cli *******************
 # https://github.com/launchbadge/sqlx/blob/main/sqlx-cli/README.md#enable-building-in-offline-mode-with-query
-[tasks.sqlx-cli_install]
+[tasks.sqlx_cli_install]
 command = "cargo"
 args = ["install", "sqlx-cli", "--no-default-features", "--features", "native-tls,postgres"]
 
-[tasks.sqlx-migrate-add]
+[tasks.sqlx_migrate_add]
 # `cargo make sqlx-migrate-add <file_name>`
 description = "Adding migration files for 'up' and 'down'"
 command = "sqlx"
 args = ["migrate", "add", "-r", "--source", "./backend/database/migrations", "${@}"]
 
-[tasks.sqlx-migrate-run]
+[tasks.sqlx_migrate_run]
 command = "sqlx"
 args = ["migrate", "run", "--source", "./backend/database/migrations"]
 
-[tasks.sqlx-migrate-revert]
+[tasks.sqlx_migrate_revert]
 # (注)ロールバック
 command = "sqlx"
 args = ["migrate", "revert", "--source", "./backend/database/migrations"]

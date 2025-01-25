@@ -8,10 +8,16 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
+    #[error("InvalidEnvironmentVariable: {0}")]
+    InvalidEnvironmentVariable(#[from] envy::Error),
     #[error("{0}")]
     AuthError(#[from] error::AuthError),
+    #[error("Init Error: {0}")]
+    InitError(#[from] anyhow::Error),
     #[error("{0}")]
     RequiredAuthorization(String),
+    #[error("InvalidHeaderValue")]
+    InvalidHeaderValue(String),
     #[error("Not Found secrets: {0}")]
     NotFoundSecrets(String),
     #[error("Password hashing failed.")]

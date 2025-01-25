@@ -7,7 +7,7 @@ use crate::State;
 
 use db::InputUserEntity;
 
-use axum::async_trait;
+// use axum::async_trait;
 use axum::extract::{FromRef, FromRequestParts, Request};
 use axum::http::request::Parts;
 use axum::{middleware::Next, response::Response, Extension, RequestPartsExt};
@@ -41,7 +41,7 @@ pub async fn authorization_middleware(
     Ok(next.run(request).await)
 }
 
-#[async_trait]
+// #[async_trait]
 impl<S> FromRequestParts<S> for AuthUser
 where
     Arc<State>: FromRef<S>,
@@ -70,17 +70,11 @@ where
         let claims = jwt
             .validate(&ids_auth::ValidateConfig::new(
                 app_state
-                    .secret_store
-                    .get("AUD")
-                    .ok_or(Error::NotFoundSecrets("AUD".into()))?,
+                    .secrets.aud.clone(),
                 app_state
-                    .secret_store
-                    .get("AUD2")
-                    .ok_or(Error::NotFoundSecrets("AUD2".into()))?,
+                    .secrets.aud2.clone(),
                 app_state
-                    .secret_store
-                    .get("ISS")
-                    .ok_or(Error::NotFoundSecrets("ISS".into()))?,
+                    .secrets.iss.clone(),
             ))
             .map_err(|e| {
                 eprintln!("{}", e);
