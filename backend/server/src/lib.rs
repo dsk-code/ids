@@ -26,6 +26,7 @@ pub struct Config {
     pub iss: String,
     pub cors_url_1: String,
     pub cors_url_2: String,
+    pub port: String,
 }
 
 pub struct State {
