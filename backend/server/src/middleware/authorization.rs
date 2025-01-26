@@ -69,12 +69,9 @@ where
         let jwt = auth::JWT::new(bearer.token().to_owned());
         let claims = jwt
             .validate(&ids_auth::ValidateConfig::new(
-                app_state
-                    .secrets.aud.clone(),
-                app_state
-                    .secrets.aud2.clone(),
-                app_state
-                    .secrets.iss.clone(),
+                app_state.secrets.aud.clone(),
+                app_state.secrets.aud2.clone(),
+                app_state.secrets.iss.clone(),
             ))
             .map_err(|e| {
                 eprintln!("{}", e);
