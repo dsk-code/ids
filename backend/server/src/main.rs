@@ -68,7 +68,7 @@ async fn main() -> Result<(), Error> {
         .nest("/api/v1", api)
         .layer(CorsLayer::new().allow_origin(origins).allow_methods(Any));
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
+    let listener = tokio::net::TcpListener::bind(secrets.port)
         .await
         .unwrap();
     println!("listening on http://{}", listener.local_addr().unwrap());
