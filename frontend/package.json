@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "remix vite:build && tailwindcss -o ./styles/output.css",
+    "build": "remix vite:build && tailwindcss -i ./app/styles/tailwind.css -o ./styles/output.css",
     "dev": "remix vite:dev && tailwindcss -o ./styles/output.css --watch",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "preview": "vite preview",

@@ -106,11 +106,11 @@ impl ClassesRepository {
         let classes = sqlx::query_as!(
             ClassEntity,
             r#"
-                    SELECT id, user_id, class_name, age, created_at, updated_at
-                    FROM classes
-                    WHERE user_id = $1
-                    ORDER BY age ASC
-                "#,
+                SELECT id, user_id, class_name, age, created_at, updated_at
+                FROM classes
+                WHERE user_id = $1
+                ORDER BY age ASC
+            "#,
             input.id(),
         )
         .fetch_all(&pool)
@@ -132,10 +132,10 @@ impl ClassesRepository {
         let class = sqlx::query_as!(
             ClassEntity,
             r#"
-                    SELECT id, user_id, class_name, age, created_at, updated_at
-                    FROM classes
-                    WHERE id = $1::UUID AND user_id = $2::UUID
-                "#,
+                SELECT id, user_id, class_name, age, created_at, updated_at
+                FROM classes
+                WHERE id = $1::UUID AND user_id = $2::UUID
+            "#,
             input.id.id(),
             input.user_id.id()
         )
