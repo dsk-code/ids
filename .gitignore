@@ -3,7 +3,6 @@
 Secrets*.toml
 .DS_Store
 .env
-tailwind.css
 /dist
 Cargo.lock
 .vscode/
