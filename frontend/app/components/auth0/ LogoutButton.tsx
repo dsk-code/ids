@@ -14,7 +14,7 @@ export const LogoutButton: React.FC = () => {
 
   return (
     <button className="px-1 py-2 bg-transparent font-bold rounded-lg hover:bg-gray-200 
-        transition-all duration-300 ml-3 text-black" onClick={handleLogout}>
+        transition-all duration-300 ml-3 text-gray-600" onClick={handleLogout}>
       ログアウト
     </button>
   );
