@@ -1,16 +1,20 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import useEnv from '../hooks/useEnv';
 import { postData } from '../api/api';
-import { Button, Container, Space, TextInput } from '@mantine/core';
+import { Button, Container, Loader, Space, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { Class, RequestPostClass } from '~/types/classTypes';
 import { Input, Text } from '@mantine/core';
 import { TbChevronDown } from "react-icons/tb";
+import { useNavigate } from "@remix-run/react";
+import { useState } from "react";
 
 export default function ClassCreateForm() {
     // https://auth0.com/docs/quickstart/spa/react/02-calling-an-api
     const { isAuthenticated, getAccessTokenSilently } = useAuth0();
     const { audience, backendApiUrl } = useEnv();
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm({
         mode: 'uncontrolled',
@@ -21,6 +25,7 @@ export default function ClassCreateForm() {
     });
 
     const show = async (values: typeof form.values) => {
+        setIsLoading(true);
         try {
             // アクセストークンの取得
             console.log("リクエスト開始");
@@ -36,7 +41,7 @@ export default function ClassCreateForm() {
 
             if (accessToken) {
                 const age = parseInt(values.age, 10)
-                
+
                 const payload:  RequestPostClass = {
                     className: values.className,
                     age: age,
@@ -51,18 +56,25 @@ export default function ClassCreateForm() {
                     payload,
                     accessToken
                 );
+
+                if (response) {
+                    navigate("/dashboard/classList");
+                }
                 console.log("Response:", response);
-            }
-            
-                
-                
+            }                
         } catch (e) {
             if (e instanceof Error) {
                 console.log(e.message);
             } else {
                 console.log("An unknown error occurred");
             }
+        } finally {
+            setIsLoading(false);
         }
+    }
+
+    if (isLoading) {
+        return <Loader color="blue" />;
     }
 
     return (

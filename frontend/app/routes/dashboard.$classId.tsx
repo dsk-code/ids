@@ -1,5 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { Button, Container, Text } from '@mantine/core';
+import { Button, Container, Loader, Text } from '@mantine/core';
 import { useParams } from '@remix-run/react';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
@@ -12,11 +12,14 @@ export default function ClassDetails() {
     const { isAuthenticated, getAccessTokenSilently } = useAuth0();
     const params = useParams();
     const [classDetails, setClassDatails] = useRecoilState(classState);
+    const [isLoading, setIsLoading] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
+    
     const { audience, backendApiUrl } = useEnv();
 
     useEffect(() => {
         const fetchClass = async () => {
+            setIsLoading(true);
             try {
                 // アクセストークンの取得
                 console.log("アクセストークンのリクエスト開始");
@@ -45,6 +48,8 @@ export default function ClassDetails() {
                 } else {
                     console.log("An unknown error occurred");
                 }
+            } finally {
+                setIsLoading(false);
             }
         };
         if (!isDeleted) {
@@ -58,6 +63,7 @@ export default function ClassDetails() {
     }
 
     const handleDelete = async () => {
+        setIsLoading(true);
         try {
             // アクセストークンの取得
             console.log("アクセストークンのリクエスト開始");
@@ -89,6 +95,8 @@ export default function ClassDetails() {
             } else {
                 console.log("An unknown error occurred");
             }
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -102,6 +110,10 @@ export default function ClassDetails() {
                 <Text c="red">クラスの詳細データが存在しません</Text>
             </Container>
         )
+    }
+
+    if (isLoading) {
+        return <Loader color="blue" />;
     }
 
     return (
