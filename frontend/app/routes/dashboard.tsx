@@ -50,9 +50,9 @@ export default function DashboardLayout() {
                   {/* <nav className="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between" aria-label="Global"> */}
                       {/* <div className="hidden sm:block"> */}
                   <Group h="100%" px="md" justify="flex-end">
-                        <Link to="/dashboard" className="hidden sm:block font-medium text-blue-500 select-none">dashboard</Link>
+                        {/* <Link to="/dashboard" className="hidden sm:block font-medium text-blue-500 select-none">dashboard</Link>
                         <Link to="/dashboard/classList" className="hidden sm:block font-medium text-blue-500 select-none">クラス一覧</Link>
-                        <Link to="/dashboard/classCreation" className="hidden sm:block font-medium text-blue-500 select-none">クラス作成</Link>
+                        <Link to="/dashboard/classCreation" className="hidden sm:block font-medium text-blue-500 select-none">クラス作成</Link> */}
                         <Auth0NavButtons />
                   </Group>
                       {/* </div> */}
@@ -68,9 +68,9 @@ export default function DashboardLayout() {
                 justify="flex-start"
                 gap="md"
               >
-                <Link to="/dashboard" className="hidden sm:block font-medium text-blue-500 select-none">dashboard</Link>
-                <Link to="/dashboard/classList" className="hidden sm:block font-medium text-blue-500 select-none">クラス一覧</Link>
-                <Link to="/dashboard/classCreation" className="hidden sm:block font-medium text-blue-500 select-none">クラス作成</Link>
+                <Link to="/dashboard" className="font-medium text-blue-500 select-none">dashboard</Link>
+                <Link to="/dashboard/classList" className="font-medium text-blue-500 select-none">クラス一覧</Link>
+                <Link to="/dashboard/classCreation" className="font-medium text-blue-500 select-none">クラス作成</Link>
               </Stack>
               </AppShell.Navbar>
 
