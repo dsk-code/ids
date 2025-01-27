@@ -4,7 +4,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import PageLoader from "../components/common/PageLoader";
 import { Link, Outlet } from '@remix-run/react';
 import { AuthenticationGuard } from '../components/auth0/AuthenticationGuard';
-import { AppShell, Burger, Group, Text } from '@mantine/core';
+import { AppShell, Burger, Group, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Auth0NavButtons from '~/components/auth0/Auth0NavButtons';
 
@@ -60,7 +60,19 @@ export default function DashboardLayout() {
                 </Group>
               </AppShell.Header>
 
-              <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
+              <AppShell.Navbar p="md">
+              <Stack
+                h={300}
+                bg="var(--mantine-color-body)"
+                align="center"
+                justify="flex-start"
+                gap="md"
+              >
+                <Link to="/dashboard" className="hidden sm:block font-medium text-blue-500 select-none">dashboard</Link>
+                <Link to="/dashboard/classList" className="hidden sm:block font-medium text-blue-500 select-none">クラス一覧</Link>
+                <Link to="/dashboard/classCreation" className="hidden sm:block font-medium text-blue-500 select-none">クラス作成</Link>
+              </Stack>
+              </AppShell.Navbar>
 
               <AppShell.Main>
                 <Outlet />

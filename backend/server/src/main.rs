@@ -68,9 +68,7 @@ async fn main() -> Result<(), Error> {
         .nest("/api/v1", api)
         .layer(CorsLayer::new().allow_origin(origins).allow_methods(Any));
 
-    let listener = tokio::net::TcpListener::bind(secrets.port)
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind(secrets.port).await.unwrap();
     println!("listening on http://{}", listener.local_addr().unwrap());
     axum::serve(listener, router).await.unwrap();
 

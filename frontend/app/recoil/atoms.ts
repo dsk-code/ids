@@ -7,9 +7,9 @@ export const userState = atom<User []>({
     default: [],
 });
 
-export const classState = atom<Class []>({
+export const classState = atom<Class | undefined>({
     key: "classState",
-    default: [],
+    default: undefined,
 })
 
 export const classListState = atom<Class []>({

@@ -36,6 +36,7 @@ export default function ClassCreateForm() {
 
             if (accessToken) {
                 const age = parseInt(values.age, 10)
+                
                 const payload:  RequestPostClass = {
                     className: values.className,
                     age: age,
