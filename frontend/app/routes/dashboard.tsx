@@ -10,7 +10,7 @@ import Auth0NavButtons from '~/components/auth0/Auth0NavButtons';
 
 export default function DashboardLayout() {
     const { isLoading } = useAuth0();
-    const [opened, { toggle }] = useDisclosure();
+    const [opened, { toggle, close }] = useDisclosure();
 
     if (isLoading) {
       return (
@@ -68,9 +68,9 @@ export default function DashboardLayout() {
                 justify="flex-start"
                 gap="md"
               >
-                <Link to="/dashboard" className="font-medium text-blue-500 select-none">dashboard</Link>
-                <Link to="/dashboard/classList" className="font-medium text-blue-500 select-none">クラス一覧</Link>
-                <Link to="/dashboard/classCreation" className="font-medium text-blue-500 select-none">クラス作成</Link>
+                <Link to="/dashboard" className="font-medium text-blue-500 select-none" onClick={close}>dashboard</Link>
+                <Link to="/dashboard/classList" className="font-medium text-blue-500 select-none" onClick={close}>クラス一覧</Link>
+                <Link to="/dashboard/classCreation" className="font-medium text-blue-500 select-none" onClick={close}>クラス作成</Link>
               </Stack>
               </AppShell.Navbar>
 

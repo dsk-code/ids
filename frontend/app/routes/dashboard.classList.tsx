@@ -1,8 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { Card, Center, Container, Space, Text } from "@mantine/core";
+import { Card, Center, Container, Loader, Space, Text } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import { Link } from "@remix-run/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { getData } from "~/api/api";
 import useEnv from "~/hooks/useEnv";
@@ -11,11 +11,13 @@ import { Class } from "~/types/classTypes";
 
 export default function ClassList() {
     const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+    const [isLoading, setIsLoading] = useState(false);
     const { audience, backendApiUrl } = useEnv();
     const [classList, setClassList] = useRecoilState(classListState);
 
     useEffect(() => {
         const fetchClassList = async () => {
+            setIsLoading(true);
             try {
                 // アクセストークンの取得
                 console.log("アクセストークンのリクエスト開始");
@@ -44,12 +46,17 @@ export default function ClassList() {
                 } else {
                     console.log("An unknown error occurred");
                 }
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchClassList();
     }, []);
 
-
+    if (isLoading) {
+        return <Loader color="blue" />;
+    }
+    
     return (
         isAuthenticated && (
             classList.length > 0 ? (
