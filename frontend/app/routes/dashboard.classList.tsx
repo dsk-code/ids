@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Card, Center, Container, Space, Text } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
+import { Link } from "@remix-run/react";
 import { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { getData } from "~/api/api";
@@ -59,9 +60,12 @@ export default function ClassList() {
                         <ul>
                             {classList && (
                                 classList.map((cls) => (
+                                    <Link to={`/dashboard/${cls.id}`} key={cls.id}>
                                         <Card className="border-2 border-gray-300 transition translate-y-4 hover:bg-gray-50 hover:shadow-lg" padding="lg" m="sm" radius="md" withBorder >
                                             <p>{cls.className}: {cls.age}歳</p>
                                         </Card>
+
+                                    </Link>
                                 ))
                             ) }          
                         </ul>

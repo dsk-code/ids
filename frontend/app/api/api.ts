@@ -44,4 +44,24 @@ export const postData = async <T>(
   
     return response.json();
 };
+
+export const deleteData = async (
+    url: string,
+    token: string
+) => {
+    const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 認証トークン
+        },
+    });
+  
+    if (response.status === 204) {
+        return response;
+    } else {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }  
+};
+
   
