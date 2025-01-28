@@ -1,16 +1,14 @@
-import Header from '../components/common/Header';
-import SideBar from '../components/common/SideBar';
 import { useAuth0 } from "@auth0/auth0-react";
-import PageLoader from "../components/common/PageLoader";
 import { Link, Outlet } from '@remix-run/react';
 import { AuthenticationGuard } from '../components/auth0/AuthenticationGuard';
-import { AppShell, Burger, Group, Stack, Text } from '@mantine/core';
+import { AppShell, Burger, Button, Drawer, Group, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import Auth0NavButtons from '~/components/auth0/Auth0NavButtons';
+import { DrawerMenuButton } from '~/components/common/DrawerMenuButton';
+import { PageLoader } from '~/components/common/PageLoader';
 
 export default function DashboardLayout() {
     const { isLoading } = useAuth0();
-    const [opened, { toggle, close }] = useDisclosure();
+    const [opened, { toggle, open, close }] = useDisclosure();
 
     if (isLoading) {
       return (
@@ -23,23 +21,15 @@ export default function DashboardLayout() {
     return(
         <>
           <AuthenticationGuard>
-            {/* <div className='flex overscroll-y-contain'>
-                <SideBar />
-                <div className='flex-1 h-screen flex flex-col'>
-                <Header />
-                <main className='flex-1 overflow-y-auto overscroll-none bg-white'>
-                    <Outlet />
-                </main>
-                </div>
-            </div> */}
             <AppShell
               header={{ height: 60 }}
               navbar={{
                 width: 250,
                 breakpoint: 'sm',
-                collapsed: { mobile: !opened },
+                collapsed: { mobile: !opened },               
               }}
               padding="md"
+              transitionDuration={500}
             >
               <AppShell.Header>
                 <Group h="100%" px="md" justify="space-between">
@@ -47,13 +37,8 @@ export default function DashboardLayout() {
                     <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
                     <Text fw={700}>IDS</Text>
                   </Group>
-                  {/* <nav className="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between" aria-label="Global"> */}
-                      {/* <div className="hidden sm:block"> */}
                   <Group h="100%" px="md" justify="flex-end">
-                        {/* <Link to="/dashboard" className="hidden sm:block font-medium text-blue-500 select-none">dashboard</Link>
-                        <Link to="/dashboard/classList" className="hidden sm:block font-medium text-blue-500 select-none">クラス一覧</Link>
-                        <Link to="/dashboard/classCreation" className="hidden sm:block font-medium text-blue-500 select-none">クラス作成</Link> */}
-                        <Auth0NavButtons />
+                    <DrawerMenuButton />
                   </Group>
                       {/* </div> */}
                   {/* </nav> */}
@@ -68,9 +53,8 @@ export default function DashboardLayout() {
                 justify="flex-start"
                 gap="md"
               >
-                <Link to="/dashboard" className="font-medium text-blue-500 select-none" onClick={close}>dashboard</Link>
-                <Link to="/dashboard/classList" className="font-medium text-blue-500 select-none" onClick={close}>クラス一覧</Link>
-                <Link to="/dashboard/classCreation" className="font-medium text-blue-500 select-none" onClick={close}>クラス作成</Link>
+                <Link to="/dashboard" className="font-medium text-black select-none" onClick={close}>dashboard</Link>
+                <Link to="/dashboard/classList" className="font-medium text-black select-none" onClick={close}>クラス一覧</Link>
               </Stack>
               </AppShell.Navbar>
 

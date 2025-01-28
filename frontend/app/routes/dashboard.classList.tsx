@@ -1,10 +1,11 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { Card, Center, Container, Loader, Space, Text } from "@mantine/core";
-import { useHover } from "@mantine/hooks";
+import { Card, Center, Container, Group, Space, Text } from "@mantine/core";
 import { Link } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { getData } from "~/api/api";
+import { CreateClassModal } from "~/components/class/CreateClassModal";
+import { PageLoader } from "~/components/common/PageLoader";
 import useEnv from "~/hooks/useEnv";
 import { classListState } from "~/recoil/atoms";
 import { Class } from "~/types/classTypes";
@@ -51,10 +52,10 @@ export default function ClassList() {
             }
         };
         fetchClassList();
-    }, []);
+    }, [classList.length]);
 
     if (isLoading) {
-        return <Loader color="blue" />;
+        return ( <PageLoader /> );
     }
     
     return (
@@ -63,7 +64,17 @@ export default function ClassList() {
                 <>
                     <Space h="md" />
                     <Container size="xs">
-                        <h1>クラスリスト</h1>
+                        <Group justify="space-between">
+                            <h1>クラス一覧</h1>
+                            <CreateClassModal />
+                            {/* <Button
+                            variant="gradient"
+                            gradient={{ from: 'teal', to: 'gray', deg: 0 }}
+                            onClick={handleCreate}
+                            >
+                            新規作成
+                            </Button> */}
+                        </Group>
                         <ul>
                             {classList && (
                                 classList.map((cls) => (
@@ -82,7 +93,10 @@ export default function ClassList() {
                 <>
                     <Space h="md" />
                     <Center>
-                      <Text c="red">クラスが登録されていません</Text>
+                        <Group justify="space-between">
+                            <Text c="red">クラスが登録されていません</Text>
+                            <CreateClassModal />
+                        </Group>
                     </Center>
                 </>
             )
@@ -90,46 +104,3 @@ export default function ClassList() {
         )
     );
   }
-
-
-
-// import React, { useState } from 'react'
-// import DatePicker from "react-datepicker";
-
-// import "react-datepicker/dist/react-datepicker.css";
-// import SearchBox from '../components/SeachBox';
-// import { useAuth0 } from '@auth0/auth0-react';
-
-// export default function Test1() {
-//     const [startDate, setStartDate] = useState(new Date());
-//     const { isAuthenticated, user } = useAuth0();
-
-//     if (!user) {
-//         return null;
-//     }
-
-//     if (isAuthenticated) {
-//         return(
-//             <>
-//                 <div className='flex flex-col'>
-//                     <div>
-//                         <SearchBox />
-//                     </div>
-                    
-//                     <DatePicker
-//                         selected={startDate}
-//                         onChange={(date) => date && setStartDate(date)}
-//                         showTimeSelect
-//                         timeFormat="HH:mm"
-//                         timeIntervals={15}
-//                         timeCaption="time"
-//                         dateFormat="yyyy-MM-dd HH:mm"
-//                     />
-//                 </div>
-//                 <h2>{user.name}</h2>
-//                 <h2>{user.email}</h2>
-//             </>
-//         )
-//     }
-// };
-

@@ -1,16 +1,10 @@
 import { User } from "./userTypes";
 
-// export interface Class {
-//     class_id: number;
-//     class_name?: string;
-//     age?: number;
-// }
-
 export interface Class {
     id: string;
     userId: string;
     className: string;
-    age?: number;
+    age: number;
     createdAt: string;
     updatedAt: string;
 }
@@ -21,6 +15,11 @@ export interface UserByClass {
 } 
 
 export interface RequestPostClass {
+    className: string;
+    age: number;
+}
+
+export interface RequestPutClass {
     className: string;
     age: number;
 }

@@ -75,6 +75,7 @@ pub async fn post_class(
 pub async fn update_class(
     auth_user: Extension<AuthUser>,
     state: Extension<Arc<State>>,
+    Path(class_id): Path<Uuid>,
     Json(body): Json<RequestUpdateClass>,
 ) -> Result<impl IntoResponse, Error> {
     let span = span!(Level::INFO, "api/v1/classes/:class_id", method = "PUT");
@@ -84,7 +85,7 @@ pub async fn update_class(
 
     let class = repo
         .update(InputUpdateClassEntity::new(
-            body.id,
+            ClassId::from(class_id),
             auth_user.id.clone(),
             body.class_name,
             body.age,

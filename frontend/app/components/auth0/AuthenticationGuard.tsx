@@ -1,6 +1,6 @@
 import { withAuthenticationRequired } from "@auth0/auth0-react";
 import React, { ReactNode } from "react";
-import PageLoader from "../common/PageLoader";
+import { PageLoader } from "../common/PageLoader";
 
 interface AuthenticationGuardProps {
   children: ReactNode;

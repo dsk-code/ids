@@ -1,12 +1,19 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { Button, Container, Loader, Text } from '@mantine/core';
-import { useParams } from '@remix-run/react';
+import { Button, Container, Flex, Group, Text } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useDisclosure } from '@mantine/hooks';
+import { useNavigate, useParams } from '@remix-run/react';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { deleteData, getData } from '~/api/api';
+import { deleteData, getData, putData } from '~/api/api';
+import { DeleteClassModal } from '~/components/class/DeleteClassModal';
+import { EditClassModal } from '~/components/class/EditClassModal';
+import { PageLoader } from '~/components/common/PageLoader';
+import { useDeleteClass } from '~/hooks/class/useDeleteClass';
+import { usePutClass } from '~/hooks/class/usePutClass';
 import useEnv from '~/hooks/useEnv';
 import { classState } from '~/recoil/atoms';
-import { Class } from '~/types/classTypes';
+import { Class, RequestPutClass } from '~/types/classTypes';
 
 export default function ClassDetails() {
     const { isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -14,6 +21,17 @@ export default function ClassDetails() {
     const [classDetails, setClassDatails] = useRecoilState(classState);
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
+    const { putClass } = usePutClass();
+    const { deleteClass } = useDeleteClass();
+    const [opened, handlers] = useDisclosure(false);
+    const navigate = useNavigate();
+    const form = useForm({
+        mode: 'uncontrolled',
+        initialValues: {
+            className: "",
+            age: "0",
+        }
+    });
     
     const { audience, backendApiUrl } = useEnv();
 
@@ -62,41 +80,72 @@ export default function ClassDetails() {
         return date.toLocaleDateString();
     }
 
-    const handleDelete = async () => {
-        setIsLoading(true);
-        try {
-            // アクセストークンの取得
-            console.log("アクセストークンのリクエスト開始");
-            const accessToken = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: audience,
-                },
-            }).catch((error) => {
-                console.error('アクセストークンの取得に失敗しました:', error);
-            });
-            console.log(accessToken);
+    // const handleDelete = async () => {
+    //     setIsLoading(true);
+    //     try {
+    //         // アクセストークンの取得
+    //         console.log("アクセストークンのリクエスト開始");
+    //         const accessToken = await getAccessTokenSilently({
+    //             authorizationParams: {
+    //                 audience: audience,
+    //             },
+    //         }).catch((error) => {
+    //             console.error('アクセストークンの取得に失敗しました:', error);
+    //         });
+    //         console.log(accessToken);
     
-            if (accessToken) {
-                // APIにPOSTリクエスト
-                console.log("クラスリストのリクエスト開始");
-                const response = await deleteData(
-                    `${backendApiUrl}/classes/${params.classId}`,
-                    accessToken
-                );
-                if (response.status === 204) {
-                    setIsDeleted(true);
-                    setClassDatails(undefined);
-                }
-                console.log("Response:", response);
-            }
-        } catch (e) {
-            if (e instanceof Error) {
-                console.log(e.message);
+    //         if (accessToken) {
+    //             // APIにPOSTリクエスト
+    //             console.log("クラスリストのリクエスト開始");
+    //             const response = await deleteData(
+    //                 `${backendApiUrl}/classes/${params.classId}`,
+    //                 accessToken
+    //             );
+    //             if (response.status === 204) {
+    //                 setIsDeleted(true);
+    //                 setClassDatails(undefined);
+    //                 navigate("/dashboard/classList");
+    //             }
+    //             console.log("Response:", response);
+    //         }
+    //     } catch (e) {
+    //         if (e instanceof Error) {
+    //             console.log(e.message);
+    //         } else {
+    //             console.log("An unknown error occurred");
+    //         }
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // }
+
+    const handleEdit = async (values: typeof form.values) => {
+        const age = parseInt(values.age, 10) 
+        const payload: RequestPutClass = {
+            className: values.className,
+            age,
+        } 
+        if (params.classId) {
+            const response = await putClass(params.classId, payload);
+            if (response?.data) {
+                setClassDatails(response.data);
+                handlers.close();
             } else {
-                console.log("An unknown error occurred");
+                console.log(response?.message);
             }
-        } finally {
-            setIsLoading(false);
+        }
+    }
+
+    const handleDelete = async () => {
+        if (params.classId) {
+            const response = await deleteClass(params.classId);
+            
+            if (response?.success) {
+                navigate("/dashboard/classList");
+                handlers.close();
+            } else {
+                console.log(response?.message);
+            }
         }
     }
 
@@ -113,17 +162,31 @@ export default function ClassDetails() {
     }
 
     if (isLoading) {
-        return <Loader color="blue" />;
+        return ( <PageLoader /> );
     }
 
     return (
         classDetails ? (
             <Container size="xs">
-                <p>クラス名: {classDetails.className}</p>
-                <p>年齢: {classDetails.age}歳</p>
-                <p>作成日: {formatDate(classDetails.createdAt)}</p>
-                <p>更新日: {formatDate(classDetails.updatedAt)}</p>
-                <Button variant="filled" color="red" size="xs" radius="md" onClick={handleDelete}>削除</Button>
+                <Flex
+                mih={50}
+                gap="md"
+                justify="center"
+                align="center"
+                direction="column"
+                wrap="wrap"
+                >
+                    <p>クラス名: {classDetails.className}</p>
+                    <p>年齢: {classDetails.age}歳</p>
+                    <p>作成日: {formatDate(classDetails.createdAt)}</p>
+                    <p>更新日: {formatDate(classDetails.updatedAt)}</p>
+                    <Group>
+                        {/* {params.classId && ( */}
+                            <EditClassModal className={classDetails.className} age={classDetails.age} opened={opened} close={handlers.close} open={handlers.open} handleEdit={handleEdit}/>
+                        {/* )} */}
+                        <DeleteClassModal className={classDetails.className} age={classDetails.age} handleDelete={handleDelete}/>
+                    </Group>
+                </Flex>
             </Container>          
         ) : (
             <Container size="xs">
