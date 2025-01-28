@@ -45,6 +45,27 @@ export const postData = async <T>(
     return response.json();
 };
 
+export const putData = async <T>(
+    url: string,
+    data: object,
+    token: string
+): Promise<T> => {
+    const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 認証トークン
+        },
+        body: JSON.stringify(data),
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+  
+    return response.json();
+};
+
 export const deleteData = async (
     url: string,
     token: string

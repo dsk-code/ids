@@ -1,11 +1,12 @@
+import { Center, Loader, Stack } from '@mantine/core'
 import React from 'react'
 
-const PageLoader: React.FC = () => {
+export const PageLoader: React.FC = () => {
   return (
-    <div className="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-gray-400 rounded-full" role="status" aria-label="loading">
-        <span className="sr-only">Loading...</span>
-    </div>
+    <Center>
+        <Stack h={500} justify="center">
+            <Loader color="blue" size="sm"/>
+        </Stack>       
+    </Center>
   )
 }
-
-export default PageLoader
