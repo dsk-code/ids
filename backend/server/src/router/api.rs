@@ -6,12 +6,13 @@ use crate::State;
 
 use axum::middleware::from_fn_with_state;
 use axum::{Extension, Router};
+use ids_auth::AuthClaims;
 use std::sync::Arc;
 // todo: /classesを作成
 pub fn api(state: Arc<State>) -> Router {
     let router = Router::new()
-        .nest_service("/me", root::router())
-        .nest_service("/classes", classes::router())
+        .nest_service("/me", root::router::<AuthClaims>())
+        .nest_service("/classes", classes::router::<AuthClaims>())
         // stateをミドルウェア関数に渡す
         .layer(from_fn_with_state(state.clone(), authorization_middleware))
         .layer(Extension(state));

@@ -18,3 +18,5 @@ dotenvy = { workspace = true }
 envy = { workspace = true }
 url = { workspace = true }
 thiserror = { workspace = true }
+
+ids_shared = {path = "../shared/"}

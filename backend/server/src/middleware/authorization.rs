@@ -1,4 +1,4 @@
-use ids_auth as auth;
+use ids_auth::{self as auth, AuthClaims};
 use ids_database as db;
 
 use crate::error::Error;
@@ -42,7 +42,7 @@ pub async fn authorization_middleware(
 }
 
 // #[async_trait]
-impl<S> FromRequestParts<S> for AuthUser
+impl<S> FromRequestParts<S> for AuthUser<AuthClaims>
 where
     Arc<State>: FromRef<S>,
     S: Send + Sync,
