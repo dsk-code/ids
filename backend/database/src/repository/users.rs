@@ -151,6 +151,28 @@ impl UserRepository for PostgresUserRepository {
 }
 
 #[cfg(test)]
+pub mod test_utils {
+    use fake::{Fake, Faker};
+    use sqlx::PgPool;
+
+    use crate::repository::test_utils::test_db_connector;
+
+    use super::*;
+
+    pub async fn test_util_create_user(pool: PgPool) -> UserEntity {
+        let db = test_db_connector(pool);
+        let repo = PostgresUserRepository::new(Arc::new(db));
+
+        let auth0_id = Auth0Id::from(Faker.fake::<String>());
+
+        let input = InputUserEntity::new(auth0_id.clone());
+        repo.create(input).await.unwrap();
+
+        repo.find_by_id(auth0_id.clone()).await.unwrap()
+    }
+}
+
+#[cfg(test)]
 pub mod tests {
     use crate::repository::test_utils::test_db_connector;
 
