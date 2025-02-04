@@ -1,5 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { Button, Container, Flex, Group, Text } from '@mantine/core';
+import { Button, Container, Flex, Group, Notification, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import { useNavigate, useParams } from '@remix-run/react';
@@ -14,6 +14,7 @@ import { usePutClass } from '~/hooks/class/usePutClass';
 import useEnv from '~/hooks/useEnv';
 import { classState } from '~/recoil/atoms';
 import { Class, RequestPutClass } from '~/types/classTypes';
+import { notifications } from '@mantine/notifications';
 
 export default function ClassDetails() {
     const { isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -143,6 +144,10 @@ export default function ClassDetails() {
             if (response?.success) {
                 navigate("/dashboard/classList");
                 handlers.close();
+                return notifications.show({
+                    title: "通知", 
+                    message: `${classDetails?.className} ${classDetails?.age}は削除されました。`
+                });
             } else {
                 console.log(response?.message);
             }

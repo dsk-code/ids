@@ -6,6 +6,7 @@ use crate::client::{Jwks, ManageMentAccessToken};
 use crate::error::AuthError;
 pub use crate::types::{KeyInitConfig, ValidateConfig};
 
+// use ids_shared::traits::claims::Claims;
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
@@ -15,14 +16,27 @@ static KEYS: OnceLock<Jwks> = OnceLock::new();
 /// アクストークンのClaimsを表現する構造体
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Claims {
-    pub iss: String,
-    pub sub: String,
-    pub aud: Vec<String>,
-    pub iat: u64,
-    pub exp: u64,
-    pub scope: String,
-    pub azp: String,
+    iss: String,
+    sub: String,
+    aud: Vec<String>,
+    iat: u64,
+    exp: u64,
+    scope: String,
+    azp: String,
 }
+
+impl Claims {
+    pub fn sub(&self) -> String {
+        self.sub.clone()
+    }
+}
+
+// note: テスト用と分岐させるためにClaimsトレイトを実装
+// impl Claims for AuthClaims {
+//     fn sub(&self) -> String {
+//         self.sub.clone()
+//     }
+// }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct JWT(String);

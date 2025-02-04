@@ -1,4 +1,4 @@
-use ids_server::{self as server, error};
+use ids_server::{self as server, error, model::auth_user::AuthUser};
 
 use crate::server::{error::Error, Config};
 
@@ -24,7 +24,7 @@ async fn main() -> Result<(), Error> {
         .map_err(|err| server::error::Error::InitError(err))?;
     let state = Arc::new(state);
 
-    let api = server::router::api::api(state.clone()).layer(
+    let api = server::router::api::api::<AuthUser>(state.clone()).layer(
         TraceLayer::new_for_http()
             .make_span_with(|_req: &Request<_>| {
                 let request_id = Uuid::new_v4();

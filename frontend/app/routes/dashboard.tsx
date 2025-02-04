@@ -1,7 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Link, Outlet } from '@remix-run/react';
 import { AuthenticationGuard } from '../components/auth0/AuthenticationGuard';
-import { AppShell, Burger, Button, Drawer, Group, Stack, Text } from '@mantine/core';
+import { AppShell, Burger, Button, Drawer, Group, Notification, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { DrawerMenuButton } from '~/components/common/DrawerMenuButton';
 import { PageLoader } from '~/components/common/PageLoader';

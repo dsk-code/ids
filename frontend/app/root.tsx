@@ -9,6 +9,7 @@ import {
 import "./styles/tailwind.css";
 import '@mantine/core/styles.css';
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
+import '@mantine/notifications/styles.css';
 
 export default function App() {
   return (
