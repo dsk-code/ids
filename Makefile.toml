@@ -19,28 +19,6 @@ command = "cargo"
 dependencies = ["db_up"]
 args = [ "run", "-p", "ids_server" ]
 
-# [tasks.run]
-# description = "Run 'cargo shuttle run'"
-# command = "cargo"
-# args = ["shuttle", "run"]
-# dependencies = ["fmt"]
-
-[tasks.test_serial]
-description = "Run tests in order"
-command = "cargo"
-args = ["test", "--", "--test-threads=1"]
-
-
-# [tasks.deploy]
-# description = "Run 'cargo shuttle deploy'"
-# command = "cargo"
-# args = ["shuttle", "deploy"]
-
-# [tasks.project_restart]
-# description = "Run 'cargo project restart'"
-# command = "cargo"
-# args = ["shuttle", "project", "restart"]
-
 
 # ******************* frontend *******************
 [tasks.front_dev]
@@ -61,13 +39,24 @@ command = "pnpm"
 args = ["run", "preview"]
 cwd = "./frontend"
 
+# ******************* backend test *******************
+[tasks.test_db_up]
+command = "docker"
+args = [ "compose", "up", "-d", "test_db" ]
 
-# [tasks.front_clean]
-# # distを空にする
-# description = "Run 'pnpm run clean' in the frontend directory"
-# command = "pnpm"
-# args = ["run", "crean"]
-# cwd = "./frontend"
+[tasks.test]
+description = "Run tests"
+dependencies = ["test_db_up"]
+command = "cargo"
+args = ["test", "${@}"]
+
+[tasks.test_db_down]
+command = "docker"
+args = [ "compose", "rm", "-fsv", "test_db" ]
+
+[tasks.test_flow]
+description = "test用のdbを開きテストしてテスト用dbを削除します。testの引数を渡せます。"
+dependencies = ["test", "test_db_down"]
 
 
 # ******************* sqlx-cli *******************

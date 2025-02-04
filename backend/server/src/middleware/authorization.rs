@@ -5,7 +5,7 @@ use crate::error::Error;
 use crate::model::auth_user::AuthUser;
 use crate::State;
 
-use db::InputUserEntity;
+use db::{InputUserEntity, UserRepository};
 
 // use axum::async_trait;
 use axum::extract::{FromRef, FromRequestParts, Request};
@@ -82,7 +82,7 @@ where
         // 在籍確認
         info!("Start checking user enrollment");
         let db = app_state.db();
-        let repo = db::UserRepository::new(db);
+        let repo = db::PostgresUserRepository::new(db);
 
         let user = repo.find_by_id(claims.sub().into()).await;
         let user = match user {
@@ -94,7 +94,7 @@ where
                 // ユーザーが見つからなかった場合、登録を行う
                 info!("User not registered");
                 info!("Start user registration");
-                let create_user = InputUserEntity::new(claims.sub().into(), None, None);
+                let create_user = InputUserEntity::new(claims.sub().into());
                 repo.create(create_user).await?;
                 // 登録後に再度ユーザーを検索
                 info!("Start reconfirming user enrollment");

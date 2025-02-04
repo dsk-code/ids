@@ -21,7 +21,7 @@ async fn main() -> Result<(), Error> {
     let state = server::init(secrets.clone())
         .await
         .context("failed to init")
-        .map_err(|err| server::error::Error::InitError(err))?;
+        .map_err(server::error::Error::InitError)?;
     let state = Arc::new(state);
 
     let api = server::router::api::api::<AuthUser>(state.clone()).layer(

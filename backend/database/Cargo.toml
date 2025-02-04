@@ -11,12 +11,15 @@ sqlx = { workspace = true }
 thiserror = { workspace = true }
 derive-new ={ workspace = true }
 uuid = { workspace = true }
-fake = { workspace = true }
 serde = { workspace = true }
 dotenvy = { workspace = true }
 envy = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 chrono = { workspace = true }
+async-trait = { workspace = true }
 
 ids_shared = {path = "../shared/"}
+
+[dev-dependencies]
+fake = { workspace = true }

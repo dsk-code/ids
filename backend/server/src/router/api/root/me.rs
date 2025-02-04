@@ -5,7 +5,7 @@ use crate::model::auth_user::AuthUserExt;
 use crate::model::{request_bodies::me::RequestAuthUser, responses::me::ResponseAuthUser};
 use crate::State;
 
-use db::InputUserEntity;
+use db::{InputUpdateUserEntity, UserRepository};
 
 use axum::{response::IntoResponse, Extension, Json};
 use std::sync::Arc;
@@ -19,31 +19,31 @@ pub async fn handler<A: AuthUserExt>(
     let span = span!(Level::INFO, "api/v1/me", method = "POST");
     let _enter = span.enter();
 
-    let repo = db::UserRepository::new(state.db());
+    let repo = db::PostgresUserRepository::new(state.db());
 
     // ユーザー名とメールの登録状況の確認
     info!("Check username and email registration status");
     let user = repo.find_by_id(auth_user.sub().into()).await?;
-    let user = match (user.auth0_user_name.clone(), user.auth0_user_email.clone()) {
-        (Some(_), Some(_)) => {
-            // ユーザー名とメールの登録状況の確認成功
-            info!("Successful verification of username and email registration status");
-            return Ok(Json(ResponseAuthUser::from(user)));
-        }
-        _ => {
-            // ユーザー名とメールの登録がされていない
-            info!("Username and email not registered");
-            let update_user = InputUserEntity::new(
-                auth_user.sub().into(),
-                body.auth0_user_name,
-                body.auth0_user_email,
-            );
-            repo.update(update_user).await?;
-            info!("Reconfirm username and email registration status");
-            repo.find_by_id(auth_user.sub().into()).await?
-        }
-    };
 
-    info!("Successful verification of username and email registration status");
-    Ok(Json(ResponseAuthUser::from(user)))
+    if user.auth0_user_name == body.auth0_user_name
+        && user.auth0_user_email == body.auth0_user_email
+    {
+        // ユーザー名とメールの登録状況の確認成功
+        info!("Successful verification of username and email registration status");
+        Ok(Json(ResponseAuthUser::from(user)))
+    } else {
+        // ユーザー名とメールの登録がされていない
+        info!("Username and email not registered");
+        let update_user = InputUpdateUserEntity::new(
+            auth_user.sub().into(),
+            body.auth0_user_name,
+            body.auth0_user_email,
+        );
+        repo.update(update_user).await?;
+        info!("Reconfirm username and email registration status");
+        let user = repo.find_by_id(auth_user.sub().into()).await?;
+
+        info!("Successful verification of username and email registration status");
+        Ok(Json(ResponseAuthUser::from(user)))
+    }
 }

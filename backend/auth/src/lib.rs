@@ -31,13 +31,6 @@ impl Claims {
     }
 }
 
-// note: テスト用と分岐させるためにClaimsトレイトを実装
-// impl Claims for AuthClaims {
-//     fn sub(&self) -> String {
-//         self.sub.clone()
-//     }
-// }
-
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct JWT(String);
 
