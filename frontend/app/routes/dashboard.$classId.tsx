@@ -173,7 +173,6 @@ export default function ClassDetails() {
     return (
         classDetails ? (
             <Container size="xs">
-                <Notification color="red" />
                 <Flex
                 mih={50}
                 gap="md"
