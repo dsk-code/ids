@@ -87,7 +87,7 @@ impl Jwks {
         let jwk = self
             .keys
             .iter()
-            .find(|key| &key.kid == kid)
+            .find(|key| key.kid == kid)
             .cloned()
             .ok_or(AuthError::NotFound("JWK".to_string()));
 

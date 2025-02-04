@@ -115,7 +115,7 @@ impl ClassesRepository {
         )
         .fetch_all(&pool)
         .await
-        .map_err(|e| Error::DatabaseError(e))?;
+        .map_err(Error::DatabaseError)?;
         info!("Successful search for ClassesEntity");
 
         Ok(classes)
@@ -141,7 +141,7 @@ impl ClassesRepository {
         )
         .fetch_one(&pool)
         .await
-        .map_err(|e| Error::DatabaseError(e))?;
+        .map_err(Error::DatabaseError)?;
         info!("Successful search for ClassesEntity");
 
         Ok(class)
@@ -169,7 +169,7 @@ impl ClassesRepository {
         )
         .fetch_one(&pool)
         .await
-        .map_err(|e| Error::DatabaseError(e))?;
+        .map_err(Error::DatabaseError)?;
         info!("Successfully updated is_active in classes table");
 
         Ok(res)
@@ -191,7 +191,7 @@ impl ClassesRepository {
         )
         .execute(&pool)
         .await
-        .map_err(|e| Error::DatabaseError(e))?;
+        .map_err(Error::DatabaseError)?;
         info!("Successfully deleted classes table");
 
         Ok(())

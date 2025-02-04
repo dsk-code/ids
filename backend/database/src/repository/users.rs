@@ -79,7 +79,7 @@ impl UserRepository {
         )
         .fetch_one(&pool)
         .await
-        .map_err(|e| Error::DatabaseError(e))?;
+        .map_err(Error::DatabaseError)?;
         info!("Successful search for UserEntity");
 
         Ok(user)
@@ -104,7 +104,7 @@ impl UserRepository {
         )
         .execute(&pool)
         .await
-        .map_err(|e| Error::DatabaseError(e))?;
+        .map_err(Error::DatabaseError)?;
         info!("Successfully updated name and email in users table");
 
         Ok(())
@@ -125,7 +125,7 @@ impl UserRepository {
         )
         .execute(&pool)
         .await
-        .map_err(|e| Error::DatabaseError(e))?;
+        .map_err(Error::DatabaseError)?;
         info!("Successfully deleted users table");
 
         Ok(())

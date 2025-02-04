@@ -135,7 +135,7 @@ pub async fn delete_class<A: AuthUserExt>(
 
     let repo = ClassesRepository::new(state.db.clone());
 
-    let _class = repo
+    repo
         .delete(InputDeleteClassEntity::new(
             ClassId::from(class_id),
             auth_user.id(),
