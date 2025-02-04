@@ -5,6 +5,7 @@ use crate::DbConnector;
 
 use shared::{ClassId, UserId};
 
+use async_trait::async_trait;
 use chrono::NaiveDateTime;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
@@ -37,7 +38,7 @@ pub struct InputFindClassEntity {
     pub user_id: UserId,
 }
 
-#[derive(Debug, new)]
+#[derive(Debug, new, Clone)]
 pub struct InputUpdateClassEntity {
     pub id: ClassId,
     pub user_id: UserId,
@@ -51,16 +52,28 @@ pub struct InputDeleteClassEntity {
     pub user_id: UserId,
 }
 
-#[derive(Clone)]
-pub struct ClassesRepository(Arc<DbConnector>);
+#[async_trait]
+pub trait ClassesRepository {
+    async fn create(&self, input: InputClassEntity) -> Result<ClassEntity, Error>;
+    async fn find_all(&self, input: UserId) -> Result<Vec<ClassEntity>, Error>;
+    async fn find_class(&self, input: InputFindClassEntity) -> Result<ClassEntity, Error>;
+    async fn update(&self, input: InputUpdateClassEntity) -> Result<ClassEntity, Error>;
+    async fn delete(&self, input: InputDeleteClassEntity) -> Result<(), Error>;
+}
 
-impl ClassesRepository {
+#[derive(Clone)]
+pub struct PostgresClassesRepository(Arc<DbConnector>);
+
+impl PostgresClassesRepository {
     pub fn new(db: Arc<DbConnector>) -> Self {
         Self(db)
     }
+}
 
+#[async_trait]
+impl ClassesRepository for PostgresClassesRepository {
     /// クラスの作成
-    pub async fn create(&self, input: InputClassEntity) -> Result<ClassEntity, Error> {
+    async fn create(&self, input: InputClassEntity) -> Result<ClassEntity, Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "create");
         let _enter = span.enter();
 
@@ -92,7 +105,7 @@ impl ClassesRepository {
     }
 
     /// すべてのクラスを検索
-    pub async fn find_all(&self, input: UserId) -> Result<Vec<ClassEntity>, Error> {
+    async fn find_all(&self, input: UserId) -> Result<Vec<ClassEntity>, Error> {
         let span = span!(
             Level::INFO,
             "db_query_execution",
@@ -122,7 +135,7 @@ impl ClassesRepository {
     }
 
     /// クラスを検索
-    pub async fn find_class(&self, input: InputFindClassEntity) -> Result<ClassEntity, Error> {
+    async fn find_class(&self, input: InputFindClassEntity) -> Result<ClassEntity, Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "find_class");
         let _enter = span.enter();
 
@@ -147,7 +160,7 @@ impl ClassesRepository {
         Ok(class)
     }
 
-    pub async fn update(&self, input: InputUpdateClassEntity) -> Result<ClassEntity, Error> {
+    async fn update(&self, input: InputUpdateClassEntity) -> Result<ClassEntity, Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "update");
         let _enter = span.enter();
 
@@ -175,7 +188,7 @@ impl ClassesRepository {
         Ok(res)
     }
 
-    pub async fn delete(&self, input: InputDeleteClassEntity) -> Result<(), Error> {
+    async fn delete(&self, input: InputDeleteClassEntity) -> Result<(), Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "delete");
         let _enter = span.enter();
 
@@ -198,148 +211,161 @@ impl ClassesRepository {
     }
 }
 
-// // todo: テストを書く
-// #[cfg(test)]
-// pub mod tests {
-//     use super::*;
-//     use crate::repository::users::InputUserEntity;
-//     use crate::{
-//         repository::users::tests::{users_create_test, users_delete_test, users_find_id},
-//         tests::util_init,
-//     };
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+    use crate::repository::{
+        test_utils::test_db_connector, users::test_utils::test_util_create_user,
+    };
 
-//     use ids_shared::Auth0Id;
+    use fake::{Fake, Faker};
+    use sqlx::{PgPool, Result};
 
-//     /// 作成テスト
-//     async fn classes_create_test(input: InputClassEntity) {
-//         let repo = ClassesRepository(util_init().await.unwrap());
-//         let class = repo.create(input.clone()).await.unwrap();
+    // https://docs.rs/sqlx/latest/sqlx/attr.test.html
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_create(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresClassesRepository::new(Arc::new(db));
 
-//         assert_eq!(
-//             (input.user_id, input.class_name, input.age.clone()),
-//             (class.user_id, class.class_name, class.age)
-//         );
-//     }
+        let user = test_util_create_user(pool).await;
 
-//     // 一覧検索の正常系テスト
-//     async fn classes_find_all(user_id: UserId, expected: Vec<TestClassData>) {
-//         let repo = ClassesRepository(util_init().await.unwrap());
+        let input = InputClassEntity::new(ClassId::new_v4(), user.id, Faker.fake(), Faker.fake());
+        // test
+        let res = repo.create(input).await;
 
-//         let classes = repo.find_all(user_id).await.unwrap();
+        assert!(res.is_ok());
 
-//         for l in 0..classes.len() {
-//             assert_eq!(
-//                 (expected[l].name.clone(), expected[l].age),
-//                 (classes[l].class_name.clone(), classes[l].age)
-//             );
-//         }
-//     }
+        Ok(())
+    }
 
-//     // クラス検索の正常系テスト
-//     async fn classes_find_class(input: InputFindClassEntity, expected: TestClassData) {
-//         let repo = ClassesRepository(util_init().await.unwrap());
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_find_all(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresClassesRepository::new(Arc::new(db));
 
-//         let class = repo.find_class(input).await.unwrap();
+        let user = test_util_create_user(pool).await;
 
-//         assert_eq!(
-//             (expected.id, expected.name, expected.age),
-//             (class.id, class.class_name, class.age)
-//         );
-//     }
+        for _i in 1..=100 {
+            let input = InputClassEntity::new(
+                ClassId::new_v4(),
+                user.id.clone(),
+                Faker.fake(),
+                Faker.fake(),
+            );
+            repo.create(input).await.unwrap();
+        }
 
-//     // is_activeの更新、正常系テスト
-//     async fn classes_update(input: InputUpdateClassEntity, expected: TestClassData) {
-//         let repo = ClassesRepository(util_init().await.unwrap());
+        // test
+        let res = repo.find_all(user.id).await.unwrap();
 
-//         let class = repo.update(input).await.unwrap();
+        assert_eq!(res.len(), 100);
 
-//         assert_eq!(
-//             (expected.id, expected.name, expected.age),
-//             (class.id, class.class_name, class.age)
-//         );
-//     }
+        Ok(())
+    }
 
-//     // レコード削除、正常系テスト
-//     async fn classes_delete(input: InputDeleteClassEntity) {
-//         let repo = ClassesRepository(util_init().await.unwrap());
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_find_class(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresClassesRepository::new(Arc::new(db));
 
-//         let res = repo.delete(input).await;
+        let user = test_util_create_user(pool).await;
 
-//         assert!(res.is_ok());
-//     }
+        let expected = InputClassEntity::new(
+            ClassId::new_v4(),
+            user.id.clone(),
+            Faker.fake(),
+            Faker.fake(),
+        );
+        repo.create(expected.clone()).await.unwrap();
 
-//     #[derive(Debug, Clone, new, PartialEq)]
-//     pub struct TestUserDatas {
-//         user_data: InputUserEntity,
-//     }
+        for _i in 1..100 {
+            let input = InputClassEntity::new(
+                ClassId::new_v4(),
+                user.id.clone(),
+                Faker.fake(),
+                Faker.fake(),
+            );
+            repo.create(input).await.unwrap();
+        }
 
-//     #[derive(Debug, Clone, new, PartialEq)]
-//     pub struct TestClassData {
-//         id: ClassId,
-//         name: String,
-//         age: i32,
-//     }
+        // test
+        let res = repo
+            .find_class(InputFindClassEntity::new(expected.id.clone(), user.id))
+            .await
+            .unwrap();
 
-//     /// classes reporitoryの正常系テスト
-//     #[tokio::test]
-//     async fn classes_test() {
-//         let auth0_id = Auth0Id::from("test".to_string());
-//         let auth0_user_name = "test".to_string();
-//         let auth0_user_email = "test@test.com".to_string();
-//         let datas = [
-//             (ClassId::new_v4(), "たまご", 0),
-//             (ClassId::new_v4(), "ひよこ", 1),
-//             (ClassId::new_v4(), "あひる", 2),
-//             (ClassId::new_v4(), "うさぎ", 3),
-//             (ClassId::new_v4(), "くま", 4),
-//             (ClassId::new_v4(), "ぞう", 5),
-//         ];
+        assert_eq!(res.id, expected.id);
+        assert_eq!(res.user_id, expected.user_id);
+        assert_eq!(res.class_name, expected.class_name);
+        assert_eq!(res.age, expected.age);
 
-//         let input_user = InputUserEntity::new(
-//             auth0_id.clone(),
-//             Some(auth0_user_name),
-//             Some(auth0_user_email),
-//         );
+        Ok(())
+    }
 
-//         let class_datas: Vec<TestClassData> = datas
-//             .clone()
-//             .into_iter()
-//             .map(|(id, name, age)| TestClassData::new(id, name.to_string(), age))
-//             .collect();
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_update(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresClassesRepository::new(Arc::new(db));
 
-//         let update_test_class =
-//             TestClassData::new(class_datas[2].id.clone(), "たけし".to_string(), 15);
+        let user = test_util_create_user(pool).await;
 
-//         users_create_test(input_user).await;
-//         let user = users_find_id(auth0_id.clone()).await;
+        let input = InputClassEntity::new(
+            ClassId::new_v4(),
+            user.id.clone(),
+            Faker.fake(),
+            Faker.fake(),
+        );
+        repo.create(input.clone()).await.unwrap();
 
-//         let input_update = InputUpdateClassEntity::new(
-//             update_test_class.id.clone(),
-//             user.id.clone(),
-//             update_test_class.name.clone(),
-//             update_test_class.age.clone(),
-//         );
+        // test
+        let expected = InputUpdateClassEntity::new(
+            input.id.clone(),
+            user.id.clone(),
+            Faker.fake(),
+            Faker.fake(),
+        );
+        repo.update(expected.clone()).await.unwrap();
 
-//         let input_find = InputFindClassEntity::new(update_test_class.id.clone(), user.id.clone());
+        let res = repo
+            .find_class(InputFindClassEntity::new(input.id, user.id))
+            .await
+            .unwrap();
 
-//         let input_delete =
-//             InputDeleteClassEntity::new(update_test_class.id.clone(), user.id.clone());
+        assert_eq!(expected.id, res.id);
+        assert_eq!(expected.user_id, res.user_id);
+        assert_eq!(expected.class_name, res.class_name);
+        assert_eq!(expected.age, res.age);
 
-//         for class_data in class_datas.clone() {
-//             let input_class = InputClassEntity::new(
-//                 class_data.id,
-//                 user.id.clone(),
-//                 class_data.name,
-//                 class_data.age,
-//             );
+        Ok(())
+    }
 
-//             classes_create_test(input_class).await;
-//         }
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_delete(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresClassesRepository::new(Arc::new(db));
 
-//         classes_find_all(user.id.clone(), class_datas.clone()).await;
-//         classes_update(input_update, update_test_class.clone()).await;
-//         classes_find_class(input_find, update_test_class.clone()).await;
-//         classes_delete(input_delete).await;
-//         users_delete_test(auth0_id.clone()).await;
-//     }
-// }
+        let user = test_util_create_user(pool).await;
+
+        let input = InputClassEntity::new(
+            ClassId::new_v4(),
+            user.id.clone(),
+            Faker.fake(),
+            Faker.fake(),
+        );
+        repo.create(input.clone()).await.unwrap();
+
+        // test
+        let res = repo
+            .delete(InputDeleteClassEntity::new(input.id, user.id))
+            .await;
+
+        assert!(res.is_ok());
+
+        Ok(())
+    }
+}

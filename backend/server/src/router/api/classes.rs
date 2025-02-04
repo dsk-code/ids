@@ -5,6 +5,7 @@ use crate::{model::request_bodies::classes::RequestPostClass, State};
 
 use axum::extract::Path;
 use axum::http::StatusCode;
+use ids_database::repository::classes::PostgresClassesRepository;
 use ids_database::{
     ClassesRepository, InputClassEntity, InputDeleteClassEntity, InputFindClassEntity,
     InputUpdateClassEntity,
@@ -45,7 +46,7 @@ pub async fn get_classes_list<A: AuthUserExt>(
     let span = span!(Level::INFO, "api/v1/classes", method = "GET");
     let _enter = span.enter();
 
-    let repo = ClassesRepository::new(state.db.clone());
+    let repo = PostgresClassesRepository::new(state.db.clone());
 
     let classes = repo.find_all(auth_user.id()).await?;
 
@@ -62,7 +63,7 @@ pub async fn post_class<A: AuthUserExt>(
     let span = span!(Level::INFO, "api/v1/classes", method = "POST");
     let _enter = span.enter();
 
-    let repo = ClassesRepository::new(state.db.clone());
+    let repo = PostgresClassesRepository::new(state.db.clone());
 
     let class = repo
         .create(InputClassEntity::new(
@@ -87,7 +88,7 @@ pub async fn update_class<A: AuthUserExt>(
     let span = span!(Level::INFO, "api/v1/classes/:class_id", method = "PUT");
     let _enter = span.enter();
 
-    let repo = ClassesRepository::new(state.db.clone());
+    let repo = PostgresClassesRepository::new(state.db.clone());
 
     let class = repo
         .update(InputUpdateClassEntity::new(
@@ -111,7 +112,7 @@ pub async fn get_class<A: AuthUserExt>(
     let span = span!(Level::INFO, "api/v1/classes/:class_id", method = "GET");
     let _enter = span.enter();
 
-    let repo = ClassesRepository::new(state.db.clone());
+    let repo = PostgresClassesRepository::new(state.db.clone());
 
     let class = repo
         .find_class(InputFindClassEntity::new(
@@ -133,7 +134,7 @@ pub async fn delete_class<A: AuthUserExt>(
     let span = span!(Level::INFO, "api/v1/classes/:class_id", method = "DELETE");
     let _enter = span.enter();
 
-    let repo = ClassesRepository::new(state.db.clone());
+    let repo = PostgresClassesRepository::new(state.db.clone());
 
     repo.delete(InputDeleteClassEntity::new(
         ClassId::from(class_id),
