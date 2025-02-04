@@ -3,6 +3,7 @@ use ids_shared as shared;
 use crate::error::Error;
 use crate::DbConnector;
 
+use async_trait::async_trait;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use shared::{Auth0Id, UserId};
@@ -12,6 +13,7 @@ use tracing::{info, span, Level};
 #[derive(Debug, new, Deserialize, Serialize)]
 pub struct UserEntity {
     pub id: UserId,
+    auth0_id: Auth0Id,
     pub auth0_user_name: Option<String>,
     pub auth0_user_email: Option<String>,
 }
@@ -19,19 +21,35 @@ pub struct UserEntity {
 #[derive(Debug, new, Clone, PartialEq)]
 pub struct InputUserEntity {
     pub auth0_id: Auth0Id,
+}
+
+#[derive(Debug, new, Clone, PartialEq)]
+pub struct InputUpdateUserEntity {
+    pub auth0_id: Auth0Id,
     pub auth0_user_name: Option<String>,
     pub auth0_user_email: Option<String>,
 }
 
-#[derive(Clone)]
-pub struct UserRepository(Arc<DbConnector>);
+#[async_trait]
+pub trait UserRepository {
+    async fn create(&self, input: InputUserEntity) -> Result<(), Error>;
+    async fn find_by_id(&self, id: Auth0Id) -> Result<UserEntity, Error>;
+    async fn update(&self, input: InputUpdateUserEntity) -> Result<(), Error>;
+    async fn delete(&self, id: Auth0Id) -> Result<(), Error>;
+}
 
-impl UserRepository {
+#[derive(Clone)]
+pub struct PostgresUserRepository(Arc<DbConnector>);
+
+impl PostgresUserRepository {
     pub fn new(db: Arc<DbConnector>) -> Self {
         Self(db)
     }
+}
 
-    pub async fn create(&self, input: InputUserEntity) -> Result<(), Error> {
+#[async_trait]
+impl UserRepository for PostgresUserRepository {
+    async fn create(&self, input: InputUserEntity) -> Result<(), Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "create");
         let _enter = span.enter();
 
@@ -61,7 +79,7 @@ impl UserRepository {
         Ok(())
     }
 
-    pub async fn find_by_id(&self, id: Auth0Id) -> Result<UserEntity, Error> {
+    async fn find_by_id(&self, id: Auth0Id) -> Result<UserEntity, Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "find_by_id");
         let _enter = span.enter();
 
@@ -71,7 +89,7 @@ impl UserRepository {
         let user = sqlx::query_as!(
             UserEntity,
             r#"
-                SELECT id, auth0_user_name, auth0_user_email
+                SELECT id, auth0_id, auth0_user_name, auth0_user_email
                 FROM users
                 WHERE auth0_id = $1
             "#,
@@ -85,7 +103,7 @@ impl UserRepository {
         Ok(user)
     }
 
-    pub async fn update(&self, input: InputUserEntity) -> Result<(), Error> {
+    async fn update(&self, input: InputUpdateUserEntity) -> Result<(), Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "update");
         let _enter = span.enter();
 
@@ -110,7 +128,7 @@ impl UserRepository {
         Ok(())
     }
 
-    pub async fn delete(&self, id: Auth0Id) -> Result<(), Error> {
+    async fn delete(&self, id: Auth0Id) -> Result<(), Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "delete");
         let _enter = span.enter();
 
@@ -134,71 +152,100 @@ impl UserRepository {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::tests::util_init;
+    use crate::repository::test_utils::test_db_connector;
 
     use super::*;
 
-    pub async fn users_create_test(input: InputUserEntity) {
-        let repo = UserRepository(util_init().await.unwrap());
+    use fake::{
+        faker::{internet::raw::FreeEmail, name::raw::Name},
+        locales::EN,
+        Fake, Faker,
+    };
+    use sqlx::{PgPool, Result};
 
-        let user = repo.create(input).await;
+    // https://docs.rs/sqlx/latest/sqlx/attr.test.html
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_create(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool);
+        let repo = PostgresUserRepository::new(Arc::new(db));
 
-        assert!(user.is_ok());
+        let input = InputUserEntity::new(Auth0Id::from(Faker.fake::<String>()));
+
+        // test
+        let res = repo.create(input).await;
+
+        assert!(res.is_ok());
+
+        Ok(())
     }
 
-    async fn users_find_test(input: InputUserEntity, expected_name: Option<String>) {
-        let repo = UserRepository(util_init().await.unwrap());
-        let user = repo.find_by_id(input.auth0_id).await.unwrap();
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_find_by_id(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool);
+        let repo = PostgresUserRepository::new(Arc::new(db));
 
-        assert_eq!(expected_name, user.auth0_user_name);
+        let expected = InputUserEntity::new(Auth0Id::from(Faker.fake::<String>()));
+        repo.create(expected.clone()).await.unwrap();
+
+        for _i in 1..=100 {
+            let input = InputUserEntity::new(Auth0Id::from(Faker.fake::<String>()));
+            repo.create(input).await.unwrap();
+        }
+
+        // test
+        let res = repo.find_by_id(expected.auth0_id.clone()).await.unwrap();
+
+        assert_eq!(res.auth0_id, expected.auth0_id);
+
+        Ok(())
     }
 
-    pub async fn users_find_id(auth0_id: Auth0Id) -> UserEntity {
-        let repo = UserRepository(util_init().await.unwrap());
-        let user = repo.find_by_id(auth0_id).await.unwrap();
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_update(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool);
+        let repo = PostgresUserRepository::new(Arc::new(db));
 
-        user
-    }
+        let auth0_id = Auth0Id::from(Faker.fake::<String>());
 
-    async fn users_update_test(input: InputUserEntity) {
-        let repo = UserRepository(util_init().await.unwrap());
+        let input = InputUserEntity::new(auth0_id.clone());
+        repo.create(input).await.unwrap();
 
-        let user = repo.update(input).await;
-
-        assert!(user.is_ok());
-    }
-
-    pub async fn users_delete_test(auth0_id: Auth0Id) {
-        let repo = UserRepository(util_init().await.unwrap());
-        let user = repo.delete(auth0_id).await;
-
-        assert!(user.is_ok());
-    }
-
-    // CRUDの一連のテスト
-    #[tokio::test]
-    async fn users_test_in_order() {
-        let auth0_id = Auth0Id::from("test".to_string());
-        let auth0_user_name = "test".to_string();
-        let auth0_user_email = "test@test.com".to_string();
-        let update_name = "test2".to_string();
-        let update_email = "test2@test2.com".to_string();
-
-        let input = InputUserEntity::new(
+        let expected = InputUpdateUserEntity::new(
             auth0_id.clone(),
-            Some(auth0_user_name),
-            Some(auth0_user_email),
+            Some(Name(EN).fake()),
+            Some(FreeEmail(EN).fake()),
         );
-        let update_input = InputUserEntity::new(
-            auth0_id.clone(),
-            Some(update_name.clone()),
-            Some(update_email),
-        );
+        repo.update(expected.clone()).await.unwrap();
 
-        users_create_test(input.clone()).await;
-        users_find_test(input.clone(), None).await;
-        users_update_test(update_input).await;
-        users_find_test(input.clone(), Some(update_name)).await;
-        users_delete_test(auth0_id.clone()).await;
+        // test
+        let res = repo.find_by_id(auth0_id.clone()).await.unwrap();
+
+        assert_eq!(res.auth0_id, auth0_id);
+        assert_eq!(res.auth0_user_name, expected.auth0_user_name);
+        assert_eq!(res.auth0_user_email, expected.auth0_user_email);
+
+        Ok(())
+    }
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_delete(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool);
+        let repo = PostgresUserRepository::new(Arc::new(db));
+
+        let auth0_id = Auth0Id::from(Faker.fake::<String>());
+
+        let input = InputUserEntity::new(auth0_id.clone());
+        repo.create(input).await.unwrap();
+
+        // test
+        let res = repo.delete(auth0_id.clone()).await;
+
+        assert!(res.is_ok());
+
+        Ok(())
     }
 }

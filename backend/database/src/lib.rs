@@ -6,7 +6,9 @@ pub use repository::classes::{
     ClassEntity, ClassesRepository, InputClassEntity, InputDeleteClassEntity, InputFindClassEntity,
     InputUpdateClassEntity,
 };
-pub use repository::users::{InputUserEntity, UserEntity, UserRepository};
+pub use repository::users::{
+    InputUpdateUserEntity, InputUserEntity, PostgresUserRepository, UserEntity, UserRepository,
+};
 
 use error::Error;
 use sqlx::PgPool;
