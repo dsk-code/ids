@@ -1,25 +1,25 @@
+use ids_auth as auth;
 use ids_database as db;
 use ids_shared as shard;
 
-// use auth::Claims;
+use auth::Claims;
 use db::UserEntity;
-use shard::{UserId, Claims};
+use shard::UserId;
+
+pub trait AuthUserExt: Send + Sync + 'static {
+    fn id(&self) -> UserId;
+    fn sub(&self) -> String;
+}
 
 #[derive(Debug, Clone)]
-pub struct AuthUser<C: Claims> {
+pub struct AuthUser {
     pub id: UserId,
     pub name: Option<String>,
-    pub claims: C,
+    pub claims: Claims,
 }
 
-impl<C: Claims> AuthUser<C> {
-    pub fn id(&self) -> shard::UserId {
-        self.id.clone()
-    }
-}
-
-impl<C: Claims> From<(db::UserEntity, C)> for AuthUser<C> {
-    fn from((user, claims): (UserEntity, C)) -> Self {
+impl From<(db::UserEntity, auth::Claims)> for AuthUser {
+    fn from((user, claims): (UserEntity, auth::Claims)) -> Self {
         Self {
             id: user.id,
             name: user.auth0_user_name,
@@ -28,6 +28,14 @@ impl<C: Claims> From<(db::UserEntity, C)> for AuthUser<C> {
     }
 }
 
+impl AuthUserExt for AuthUser {
+    fn id(&self) -> UserId {
+        self.id.clone()
+    }
+    fn sub(&self) -> String {
+        self.claims.sub()
+    }
+}
 
 // use ids_auth as auth;
 // use ids_database as db;

@@ -6,7 +6,7 @@ use crate::client::{Jwks, ManageMentAccessToken};
 use crate::error::AuthError;
 pub use crate::types::{KeyInitConfig, ValidateConfig};
 
-use ids_shared::traits::claims::Claims;
+// use ids_shared::traits::claims::Claims;
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
@@ -15,22 +15,28 @@ static KEYS: OnceLock<Jwks> = OnceLock::new();
 
 /// アクストークンのClaimsを表現する構造体
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct AuthClaims {
-    pub iss: String,
-    pub sub: String,
-    pub aud: Vec<String>,
-    pub iat: u64,
-    pub exp: u64,
-    pub scope: String,
-    pub azp: String,
+pub struct Claims {
+    iss: String,
+    sub: String,
+    aud: Vec<String>,
+    iat: u64,
+    exp: u64,
+    scope: String,
+    azp: String,
 }
 
-// note: テスト用と分岐させるためにClaimsトレイトを実装
-impl Claims for AuthClaims {
-    fn sub(&self) -> String {
+impl Claims {
+    pub fn sub(&self) -> String {
         self.sub.clone()
     }
 }
+
+// note: テスト用と分岐させるためにClaimsトレイトを実装
+// impl Claims for AuthClaims {
+//     fn sub(&self) -> String {
+//         self.sub.clone()
+//     }
+// }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct JWT(String);
@@ -45,7 +51,7 @@ impl JWT {
     }
 
     /// アクセストークンを検証
-    pub fn validate(&self, secret: &ValidateConfig) -> Result<AuthClaims, AuthError> {
+    pub fn validate(&self, secret: &ValidateConfig) -> Result<Claims, AuthError> {
         let jwks = KEYS.get().ok_or(AuthError::NotFound("key".to_string()))?;
         let header = decode_header(self.access_token())?;
         let jwk = jwks.get_jwk(&header.kid.ok_or(AuthError::NotFound("kid".to_string()))?)?;
@@ -53,7 +59,7 @@ impl JWT {
         let mut validation = Validation::new(Algorithm::RS256);
         validation.set_audience(&[&secret.aud, &secret.aud2]);
         // validation.set_issuer(&[&secret.iss]);
-        let token_data = decode::<AuthClaims>(self.access_token(), &decoding_key, &validation)?;
+        let token_data = decode::<Claims>(self.access_token(), &decoding_key, &validation)?;
 
         Ok(token_data.claims)
     }

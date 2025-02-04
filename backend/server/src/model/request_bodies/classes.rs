@@ -15,4 +15,3 @@ pub struct RequestUpdateClass {
     pub class_name: String,
     pub age: i32,
 }
-

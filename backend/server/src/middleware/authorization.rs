@@ -1,4 +1,4 @@
-use ids_auth::{self as auth, AuthClaims};
+use ids_auth as auth;
 use ids_database as db;
 
 use crate::error::Error;
@@ -42,7 +42,7 @@ pub async fn authorization_middleware(
 }
 
 // #[async_trait]
-impl<S> FromRequestParts<S> for AuthUser<AuthClaims>
+impl<S> FromRequestParts<S> for AuthUser
 where
     Arc<State>: FromRef<S>,
     S: Send + Sync,
@@ -84,7 +84,7 @@ where
         let db = app_state.db();
         let repo = db::UserRepository::new(db);
 
-        let user = repo.find_by_id(claims.sub.clone().into()).await;
+        let user = repo.find_by_id(claims.sub().into()).await;
         let user = match user {
             Ok(user) => {
                 info!("Successful user registration verification");
@@ -94,11 +94,11 @@ where
                 // ユーザーが見つからなかった場合、登録を行う
                 info!("User not registered");
                 info!("Start user registration");
-                let create_user = InputUserEntity::new(claims.sub.clone().into(), None, None);
+                let create_user = InputUserEntity::new(claims.sub().into(), None, None);
                 repo.create(create_user).await?;
                 // 登録後に再度ユーザーを検索
                 info!("Start reconfirming user enrollment");
-                repo.find_by_id(claims.sub.clone().into()).await?
+                repo.find_by_id(claims.sub().into()).await?
             }
         };
 

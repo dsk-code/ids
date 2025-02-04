@@ -1,16 +1,15 @@
 use crate::error::Error;
-use crate::model::auth_user::AuthUser;
+use crate::model::auth_user::{AuthUser, AuthUserExt};
 use crate::model::request_bodies::classes::RequestUpdateClass;
 use crate::{model::request_bodies::classes::RequestPostClass, State};
 
 use axum::extract::Path;
 use axum::http::StatusCode;
-use ids_auth::AuthClaims;
 use ids_database::{
     ClassesRepository, InputClassEntity, InputDeleteClassEntity, InputFindClassEntity,
     InputUpdateClassEntity,
 };
-use ids_shared::{Claims, ClassId};
+use ids_shared::ClassId;
 use tracing::{span, Level};
 
 use axum::{
@@ -19,23 +18,28 @@ use axum::{
     Extension, Json, Router,
 };
 // use axum_macros::debug_handler;
-use uuid::Uuid;
 use std::sync::Arc;
+use uuid::Uuid;
 
-pub fn router<C: Claims>() -> Router {
+pub fn router<A: AuthUserExt>() -> Router {
     Router::new()
-        .route("/", post(post_class::<AuthClaims>).get(get_classes_list::<AuthClaims>))
+        .route(
+            "/",
+            post(post_class::<AuthUser>).get(get_classes_list::<AuthUser>),
+        )
         .route(
             "/{class_id}",
-            put(update_class::<AuthClaims>).get(get_class::<AuthClaims>).delete(delete_class::<AuthClaims>),
+            put(update_class::<AuthUser>)
+                .get(get_class::<AuthUser>)
+                .delete(delete_class::<AuthUser>),
         )
 }
 
 /// クラス一覧取得
 /// debug_handlerはジェネリックをサポートしていない
 // #[debug_handler]
-pub async fn get_classes_list<C: Claims>(
-    auth_user: Extension<AuthUser<C>>,
+pub async fn get_classes_list<A: AuthUserExt>(
+    auth_user: Extension<A>,
     state: Extension<Arc<State>>,
 ) -> Result<impl IntoResponse, Error> {
     let span = span!(Level::INFO, "api/v1/classes", method = "GET");
@@ -43,15 +47,15 @@ pub async fn get_classes_list<C: Claims>(
 
     let repo = ClassesRepository::new(state.db.clone());
 
-    let classes = repo.find_all(auth_user.id.clone()).await?;
+    let classes = repo.find_all(auth_user.id()).await?;
 
     Ok((StatusCode::OK, (Json(classes))))
 }
 
 /// クラス作成
 // #[debug_handler]
-pub async fn post_class<C: Claims>(
-    auth_user: Extension<AuthUser<C>>,
+pub async fn post_class<A: AuthUserExt>(
+    auth_user: Extension<A>,
     state: Extension<Arc<State>>,
     Json(body): Json<RequestPostClass>,
 ) -> Result<impl IntoResponse, Error> {
@@ -63,7 +67,7 @@ pub async fn post_class<C: Claims>(
     let class = repo
         .create(InputClassEntity::new(
             ClassId::new_v4(),
-            auth_user.id.clone(),
+            auth_user.id(),
             body.class_name,
             body.age,
         ))
@@ -74,8 +78,8 @@ pub async fn post_class<C: Claims>(
 
 /// クラス更新
 // #[debug_handler]
-pub async fn update_class<C: Claims>(
-    auth_user: Extension<AuthUser<C>>,
+pub async fn update_class<A: AuthUserExt>(
+    auth_user: Extension<A>,
     state: Extension<Arc<State>>,
     Path(class_id): Path<Uuid>,
     Json(body): Json<RequestUpdateClass>,
@@ -88,7 +92,7 @@ pub async fn update_class<C: Claims>(
     let class = repo
         .update(InputUpdateClassEntity::new(
             ClassId::from(class_id),
-            auth_user.id.clone(),
+            auth_user.id(),
             body.class_name,
             body.age,
         ))
@@ -99,8 +103,8 @@ pub async fn update_class<C: Claims>(
 
 /// クラス検索
 // #[debug_handler]
-pub async fn get_class<C: Claims>(
-    auth_user: Extension<AuthUser<C>>,
+pub async fn get_class<A: AuthUserExt>(
+    auth_user: Extension<A>,
     state: Extension<Arc<State>>,
     Path(class_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
@@ -110,7 +114,10 @@ pub async fn get_class<C: Claims>(
     let repo = ClassesRepository::new(state.db.clone());
 
     let class = repo
-        .find_class(InputFindClassEntity::new(ClassId::from(class_id), auth_user.id.clone()))
+        .find_class(InputFindClassEntity::new(
+            ClassId::from(class_id),
+            auth_user.id(),
+        ))
         .await?;
 
     Ok((StatusCode::OK, Json(class)))
@@ -118,8 +125,8 @@ pub async fn get_class<C: Claims>(
 
 /// クラス削除
 // #[debug_handler]
-pub async fn delete_class<C: Claims>(
-    auth_user: Extension<AuthUser<C>>,
+pub async fn delete_class<A: AuthUserExt>(
+    auth_user: Extension<A>,
     state: Extension<Arc<State>>,
     Path(class_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
@@ -129,7 +136,10 @@ pub async fn delete_class<C: Claims>(
     let repo = ClassesRepository::new(state.db.clone());
 
     let _class = repo
-        .delete(InputDeleteClassEntity::new(ClassId::from(class_id), auth_user.id.clone()))
+        .delete(InputDeleteClassEntity::new(
+            ClassId::from(class_id),
+            auth_user.id(),
+        ))
         .await?;
 
     Ok(StatusCode::NO_CONTENT)
@@ -167,8 +177,8 @@ pub async fn delete_class<C: Claims>(
 //                 email: "dummydummydummy@dummydummy.com".to_string(),
 //                 password: "dummy".to_string(),
 //             };
-    
-//             user 
+
+//             user
 //         }
 //     }
 
@@ -268,7 +278,7 @@ pub async fn delete_class<C: Claims>(
 
 //     //     parts.extensions.insert(auth_user.clone());
 //     //     let request = Request::from_parts(parts, body);
-    
+
 //     //     next.run(request).await
 //     // }
 
@@ -284,14 +294,12 @@ pub async fn delete_class<C: Claims>(
 //     use axum::body::Body;
 //     use axum::middleware::from_fn_with_state;
 //     use test_utils::{test_util_access_token, test_util_create_user, test_util_delete, test_util_init};
-    
+
 //     use std::fs;
 //     use axum::{routing::post, Router};
 //     use axum::http::{self, Request, StatusCode};
 //     use tower::ServiceExt;
 //     use serde_json::json;
-
-
 
 //     #[tokio::test]
 //     async fn test_create_planet() {
@@ -344,5 +352,3 @@ pub async fn delete_class<C: Claims>(
 //     }
 
 // }
-
-
