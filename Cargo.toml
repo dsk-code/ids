@@ -24,10 +24,8 @@ shuttle-shared-db = { version = "0.51.0", features = ["postgres", "sqlx"] }
 sqlx = { version = "0.8.3", features = ["runtime-tokio", "postgres", "macros", "migrate", "uuid", "chrono"] }
 tower-http = {version = "0.6.2", features = ["fs", "cors"]}
 thiserror = "2.0.11"
-anyhow = "1.0.86"
 serde = {version = "1.0.0", features = ["derive"]}
 derive-new = "0.6.0"
-fake = "2.9.2"
 jsonwebtoken = "9.3.0"
 chrono  = "0.4.37"
 reqwest = { version = "0.12.7", features = ["json"] }
@@ -38,5 +36,11 @@ url = "2.5.2"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 async-trait = "0.1.86"
+tower = "0.5.2"
+serde_json = "1.0.138"
+
 # test
-test-auth0 = {git = "https://github.com/dsk-code/test-auth0.git", rev = "671fa25c98a8e0ce9da6d651b48aa4d895441649"}
+mime = "0.3.17"
+anyhow = "1.0.86"
+fake = "2.9.2"
+rstest = "0.24.0"

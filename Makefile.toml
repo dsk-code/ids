@@ -1,3 +1,6 @@
+[env]
+TEST_DATABASE_URL="postgres://postgres:postgres@localhost:5434/postgres"
+
 [config]
 default_to_workspace = false
 
@@ -5,6 +8,10 @@ default_to_workspace = false
 [tasks.fmt]
 command = "cargo"
 args = ["fmt"]
+
+[tasks.clippy]
+command = "cargo"
+args = ["clippy"]
 
 [tasks.db_up]
 command = "docker"
@@ -46,7 +53,7 @@ args = [ "compose", "up", "-d", "test_db" ]
 
 [tasks.test]
 description = "Run tests"
-dependencies = ["test_db_up"]
+dependencies = ["test_db_up", "clippy", "fmt"]
 command = "cargo"
 args = ["test", "${@}"]
 

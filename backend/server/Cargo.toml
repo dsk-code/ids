@@ -13,7 +13,6 @@ shuttle-shared-db = { workspace = true }
 sqlx = { workspace = true }
 tokio = { workspace = true }
 thiserror = { workspace = true }
-anyhow = { workspace = true }
 serde = { workspace = true }
 dotenvy = { workspace = true }
 envy = { workspace = true }
@@ -22,7 +21,15 @@ tracing = { workspace = true }
 chrono = { workspace = true }
 tracing-subscriber = { workspace = true }
 uuid = { workspace = true }
+tower = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
 
 ids_auth = { path = "../auth/" }
 ids_database = { path = "../database/" }
 ids_shared = {path = "../shared/"}
+
+[dev-dependencies]
+fake = { workspace = true }
+mime = { workspace = true }
+rstest = { workspace = true }

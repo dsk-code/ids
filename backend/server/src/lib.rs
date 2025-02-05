@@ -29,13 +29,20 @@ pub struct Config {
     pub port: String,
 }
 
+#[derive(Clone)]
+pub struct JWTValidationConfig {
+    pub aud: String,
+    pub aud2: String,
+    pub iss: String,
+}
+
 pub struct State {
     db: Arc<DbConnector>,
-    secrets: Config,
+    secrets: JWTValidationConfig,
 }
 
 impl State {
-    pub fn new(db: DbConnector, secrets: Config) -> Self {
+    pub fn new(db: DbConnector, secrets: JWTValidationConfig) -> Self {
         Self {
             db: Arc::new(db),
             secrets,
@@ -49,18 +56,25 @@ impl State {
 
 pub async fn init(secrets: Config) -> Result<State, Error> {
     let auth_secret = KeyInitConfig {
-        access_token_url: secrets.access_token_url.clone(),
-        management_api_client_id: secrets.management_api_client_id.clone(),
-        management_api_client_secret: secrets.management_api_client_secret.clone(),
-        management_api_audience: secrets.management_api_audience.clone(),
-        jwks_url: secrets.jwks_url.clone(),
+        access_token_url: secrets.access_token_url,
+        management_api_client_id: secrets.management_api_client_id,
+        management_api_client_secret: secrets.management_api_client_secret,
+        management_api_audience: secrets.management_api_audience,
+        jwks_url: secrets.jwks_url,
     };
 
     key_init(&auth_secret).await?;
 
     let db_connector = ids_database::init(secrets.database_url.clone()).await?;
 
-    let db = State::new(db_connector, secrets);
+    let db = State::new(
+        db_connector,
+        JWTValidationConfig {
+            aud: secrets.aud,
+            aud2: secrets.aud2,
+            iss: secrets.iss,
+        },
+    );
 
     Ok(db)
 }
