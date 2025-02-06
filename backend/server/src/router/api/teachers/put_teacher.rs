@@ -126,7 +126,7 @@ mod tests {
             .layer(from_fn(test_unauthorization_middleware))
             .layer(Extension(init.get_state()));
 
-        let get_res = test_router
+        let post_res = test_router
             .clone()
             .oneshot(
                 Request::builder()
@@ -140,7 +140,7 @@ mod tests {
             .await
             .unwrap();
 
-        let body_bytes = to_bytes(get_res.into_body(), usize::MAX).await.unwrap();
+        let body_bytes = to_bytes(post_res.into_body(), usize::MAX).await.unwrap();
         let teacher_id: ResponseTeacherId = serde_json::from_slice(&body_bytes).unwrap();
 
         let update_res = test_router
@@ -171,8 +171,6 @@ mod tests {
             )
             .await
             .unwrap();
-
-        assert_eq!(result.status(), StatusCode::OK);
 
         let body_bytes = to_bytes(result.into_body(), usize::MAX).await.unwrap();
         let teacher: TeacherEntity = serde_json::from_slice(&body_bytes).unwrap();

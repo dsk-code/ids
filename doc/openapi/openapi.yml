@@ -455,6 +455,14 @@ components:
             required:
                 - status
 
+        ReseponseTeacherId:
+            type: object
+            properties:
+                id:
+                    $ref: '#/components/schemas/TeacherId'
+            required:
+                - id
+
     #-------------------------------
     # Reusable operation parameters
     #-------------------------------
@@ -599,7 +607,7 @@ components:
             content:
                 application/json:
                     schema:
-                        $ref: '#/components/schemas/TeacherId'
+                        $ref: '#/components/schemas/ReseponseTeacherId'
 
         OkGetTeacher:
             description: OK
@@ -613,14 +621,14 @@ components:
             content:
                 application/json:
                     schema:
-                        $ref: '#/components/schemas/TeacherId'
+                        $ref: '#/components/schemas/ReseponseTeacherId'
 
         OkPatchTeacher:
             description: OK
             content:
                 application/json:
                     schema:
-                        $ref: '#/components/schemas/TeacherId'
+                        $ref: '#/components/schemas/ReseponseTeacherId'
 
 
         NotFound:
