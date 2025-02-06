@@ -1,5 +1,6 @@
 pub mod classes;
 pub mod me;
+pub mod teachers;
 
 // use ids_database::UserEntity;
 // use ids_shared::UserId;

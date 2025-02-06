@@ -4,6 +4,7 @@ use ids_database::DbConnector;
 pub mod error;
 pub mod middleware;
 pub mod model;
+pub mod query;
 pub mod router;
 
 use ids_auth::{key_init, types::KeyInitConfig};

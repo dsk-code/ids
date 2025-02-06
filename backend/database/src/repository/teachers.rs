@@ -2,6 +2,7 @@ use super::Pagination;
 use crate::{error::Error, DbConnector};
 
 use ids_shared::{types::id::TeacherId, UserId};
+use serde::{Deserialize, Serialize};
 use tracing::{info, span, Level};
 
 use async_trait::async_trait;
@@ -9,7 +10,8 @@ use chrono::{NaiveDate, NaiveDateTime};
 use derive_new::new;
 use std::sync::Arc;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct TeacherEntity {
     pub id: TeacherId,
     pub user_id: UserId,
@@ -36,7 +38,8 @@ pub struct TeacherEntity {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Debug, new)]
+#[derive(Debug, new, Deserialize, Serialize, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct PaginatedTeachersListEntity {
     pub teachers: Vec<TeacherEntity>,
     pub offset: i64,
@@ -155,6 +158,7 @@ impl TeachersRepository for PostgresTeachersRepository {
         Ok(TeacherId::from(id))
     }
 
+    // todo: クエリパラメーターでstatusの値ごとの検索を追加
     async fn find_all_with_pagination(
         &self,
         input: UserId,
@@ -202,7 +206,7 @@ impl TeachersRepository for PostgresTeachersRepository {
                 ORDER BY created_at DESC
                 LIMIT $2 OFFSET $3
             "#,
-            input.id(),
+            input.clone().id(),
             pagination.limit,
             pagination.offset,
         )
@@ -214,7 +218,9 @@ impl TeachersRepository for PostgresTeachersRepository {
             r#"
                 SELECT COUNT(*)
                 FROM teachers
-            "#
+                WHERE user_id = $1::UUID
+            "#,
+            input.id(),
         )
         .fetch_one(&pool)
         .await

@@ -1,5 +1,6 @@
 pub mod classes;
 pub mod root;
+pub mod teachers;
 
 use crate::middleware::authorization::authorization_middleware;
 use crate::model::auth_user::{AuthUser, AuthUserExt};
@@ -13,7 +14,8 @@ pub fn api<A: AuthUserExt>(state: Arc<State>) -> Router {
     Router::new()
         .nest_service("/me", root::router::<AuthUser>())
         .nest_service("/classes", classes::router::<AuthUser>())
-        // stateをミドルウェア関数に渡す
+        // todo: teschers router
+        // .nest_service("/teachers", service)
         .layer(from_fn_with_state(state.clone(), authorization_middleware))
         .layer(Extension(state))
 }

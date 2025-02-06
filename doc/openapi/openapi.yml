@@ -269,68 +269,68 @@ components:
             properties:
                 id:
                     $ref: '#/components/schemas/TeacherId'
-                user_id:
+                userId:
                     $ref: '#/components/schemas/UserId'
-                last_name:
+                lastName:
                     type: string
-                first_name:
+                firstName:
                     type: string
-                last_name_kana:
+                lastNameKana:
                     type: string
-                first_name_kana:
+                firstNameKana:
                     type: string
                 phone:
                     type: string
-                mobile_phone:
+                mobilePhone:
                     type: string
                 email:
                     type: string
-                post_code1:
+                postCode1:
                     type: string
-                post_code2:
+                postCode2:
                     type: string
-                prefectures:
+                prefecture:
                     type: string
                 city:
                     type: string
-                street_address:
+                streetAddress:
                     type: string
                 building:
                     type: string
-                prefectures_kana:
+                prefecturesKana:
                     type: string
-                city_kana:
+                cityKana:
                     type: string
-                building_kana:
+                buildingKana:
                     type: string
-                hire_date:
+                hireDate:
                     type: string
                     format: date
-                leave_date:
+                leaveDate:
                     type: string
                     format: date
                 status:
                     type: string
-                created_at:
+                createdAt:
                     type: string
                     format: date-time
-                updated_at:
+                updatedAt:
                     type: string
                     format: date-time
             required:
               - id
-              - user_id
-              - last_name
-              - first_name
-              - post_code1
-              - post_code2
+              - userId
+              - lastName
+              - firstName
+              - postCode1
+              - postCode2
               - prefectures
               - city
-              - street_address
-              - hire_date
+              - streetAddress
+              - hireDate
               - status
-              - created_at
-              - updated_at
+              - createdAt
+              - updatedAt
                 
         TeacherList:
             type: array
@@ -351,103 +351,103 @@ components:
         RequestPostTeachers:
             type: object
             properties:
-                last_name:
+                lastName:
                     type: string
-                first_name:
+                firstName:
                     type: string
-                last_name_kana:
+                lastNameKana:
                     type: string
-                first_name_kana:
+                firstNameKana:
                     type: string
                 phone:
                     type: string
-                mobile_phone:
+                mobilePhone:
                     type: string
                 email:
                     type: string
-                post_code1:
+                postCode1:
                     type: string
-                post_code2:
+                postCode2:
                     type: string
-                prefectures:
+                prefecture:
                     type: string
                 city:
                     type: string
-                street_address:
+                streetAddress:
                     type: string
                 building:
                     type: string
-                prefectures_kana:
+                prefecturesKana:
                     type: string
-                city_kana:
+                cityKana:
                     type: string
-                building_kana:
+                buildingKana:
                     type: string
-                hire_date:
+                hireDate:
                     type: string
                     format: date
             required:
-                - last_name
-                - first_name
-                - post_code1
-                - post_code2
+                - lastName
+                - firstName
+                - postCode1
+                - postCode2
                 - prefectures
                 - city
-                - street_address
-                - hire_date
+                - streetAddress
+                - hireDate
 
         RequestPutTeacher:
             type: object
             properties:
-                last_name:
+                lastName:
                     type: string
-                first_name:
+                firstName:
                     type: string
-                last_name_kana:
+                lastNameKana:
                     type: string
-                first_name_kana:
+                firstNameKana:
                     type: string
                 phone:
                     type: string
-                mobile_phone:
+                mobilePhone:
                     type: string
                 email:
                     type: string
-                post_code1:
+                postCode1:
                     type: string
-                post_code2:
+                postCode2:
                     type: string
-                prefectures:
+                prefecture:
                     type: string
                 city:
                     type: string
-                street_address:
+                streetAddress:
                     type: string
                 building:
                     type: string
-                prefectures_kana:
+                prefecturesKana:
                     type: string
-                city_kana:
+                cityKana:
                     type: string
-                building_kana:
+                buildingKana:
                     type: string
-                hire_date:
+                hireDate:
                     type: string
                     format: date
             required:
-                - last_name
-                - first_name
-                - post_code1
-                - post_code2
+                - lastName
+                - firstName
+                - postCode1
+                - postCode2
                 - prefectures
                 - city
-                - street_address
-                - hire_date
+                - streetAddress
+                - hireDate
 
         RequestPatchTeacher:
             type: object
             properties:
-                leave_date:
+                leaveDate:
                     type: string
                     format: date
                 status:
@@ -583,7 +583,16 @@ components:
             content:
                 application/json:
                     schema:
-                        $ref: '#/components/schemas/TeacherList'
+                        type: object
+                        properties:
+                            items:
+                                $ref: '#/components/schemas/TeacherList'
+                            offset:
+                                $ref: '#/components/schemas/PagenationOffset'
+                            limit:
+                                $ref: '#/components/schemas/PagenationLimit'
+                            total:
+                                type: integer
         
         OkPostTeachers:
             description: OK
