@@ -6,9 +6,14 @@ pub use repository::classes::{
     ClassEntity, ClassesRepository, InputClassEntity, InputDeleteClassEntity, InputFindClassEntity,
     InputUpdateClassEntity,
 };
+pub use repository::teachers::{
+    InputDeleteTeacherEntity, InputFindTeacherEntity, InputPatchTeacherEntity, InputTeacherEntity,
+    PaginatedTeachersListEntity, PostgresTeachersRepository, TeacherEntity, TeachersRepository,
+};
 pub use repository::users::{
     InputUpdateUserEntity, InputUserEntity, PostgresUserRepository, UserEntity, UserRepository,
 };
+pub use repository::Pagination;
 
 use error::Error;
 use sqlx::PgPool;

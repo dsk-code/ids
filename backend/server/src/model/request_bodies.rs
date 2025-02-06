@@ -1,6 +1,6 @@
 pub mod classes;
 pub mod me;
-
+pub mod teachers;
 // use serde::{Deserialize, Serialize};
 
 // /// POST api/vi/me
