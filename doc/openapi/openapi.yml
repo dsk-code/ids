@@ -471,14 +471,14 @@ components:
         PagenationLimitQuery:
             name: limit
             in: query
-            required: false
+            required: true
             schema:
               $ref: '#/components/schemas/PagenationLimit'
 
         PagenationOffsetQuery:
             name: offset
             in: query
-            required: false
+            required: true
             schema:
               $ref: '#/components/schemas/PagenationOffset'
 
@@ -492,7 +492,7 @@ components:
         TeachersStateQuery:
             name: status
             in: query
-            required: false
+            required: true
             schema:
                 $ref: '#/components/schemas/TeachersStatus'
 

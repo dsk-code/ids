@@ -1,8 +1,9 @@
 use crate::error::Error;
 use crate::model::auth_user::AuthUserExt;
-use crate::query::Paginations;
+use crate::query::PaginationsWithTeachersStatus;
 use crate::State;
 
+use ids_database::repository::teachers::InputFindStatusTeacherEntity;
 use ids_database::{PostgresTeachersRepository, TeachersRepository};
 
 use axum::extract::Query;
@@ -12,7 +13,7 @@ use std::sync::Arc;
 use tracing::{span, Level};
 
 pub async fn get_teachers_list<A: AuthUserExt>(
-    Query(paginations): Query<Paginations>,
+    Query(paginations_with_status): Query<PaginationsWithTeachersStatus>,
     auth_user: Extension<A>,
     state: Extension<Arc<State>>,
 ) -> Result<impl IntoResponse, Error> {
@@ -22,7 +23,13 @@ pub async fn get_teachers_list<A: AuthUserExt>(
     let repo = PostgresTeachersRepository::new(state.db.clone());
 
     let teachers = repo
-        .find_all_with_pagination(auth_user.id(), paginations.into())
+        .find_status_with_pagination(
+            InputFindStatusTeacherEntity::new(
+                auth_user.id(),
+                paginations_with_status.status.clone(),
+            ),
+            paginations_with_status.into(),
+        )
         .await?;
 
     Ok((StatusCode::OK, Json(teachers)))
@@ -45,14 +52,16 @@ mod tests {
     use tower::ServiceExt;
 
     #[rstest::rstest]
-    #[case(Faker.fake::<String>(), 45, 10, 5, 50)]
+    #[case(Faker.fake::<String>(), 45, 10, 5, 50, "active")]
+    #[case(Faker.fake::<String>(), 45, 10, 0, 0, "inactive")]
     #[tokio::test]
     async fn test_get_teachers_list(
         #[case] token: String,
         #[case] offset: i32,
         #[case] limit: i32,
         #[case] expected_length: usize,
-        #[case] total: i64,
+        #[case] expected_total: i64,
+        #[case] status: &str,
     ) {
         let init = TestInit::new().await;
 
@@ -104,7 +113,10 @@ mod tests {
             .oneshot(
                 Request::builder()
                     .method(http::Method::GET)
-                    .uri(format!("/?offset={}&limit={}", offset, limit))
+                    .uri(format!(
+                        "/?offset={}&limit={}&status={}",
+                        offset, limit, status
+                    ))
                     .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                     .header(http::header::AUTHORIZATION, format!("Bearer {}", token))
                     .body(Body::empty())
@@ -119,6 +131,6 @@ mod tests {
         let result: PaginatedTeachersListEntity = serde_json::from_slice(&body_bytes).unwrap();
 
         assert_eq!(result.teachers.len(), expected_length);
-        assert_eq!(result.total, Some(total));
+        assert_eq!(result.total, Some(expected_total));
     }
 }

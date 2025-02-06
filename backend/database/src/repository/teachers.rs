@@ -71,6 +71,12 @@ pub struct InputTeacherEntity {
 }
 
 #[derive(Debug, new)]
+pub struct InputFindStatusTeacherEntity {
+    pub user_id: UserId,
+    pub status: String,
+}
+
+#[derive(Debug, new)]
 pub struct InputFindTeacherEntity {
     pub id: TeacherId,
     pub user_id: UserId,
@@ -93,11 +99,16 @@ pub struct InputDeleteTeacherEntity {
 #[async_trait]
 pub trait TeachersRepository {
     async fn create(&self, input: InputTeacherEntity) -> Result<TeacherId, Error>;
-    async fn find_all_with_pagination(
+    async fn find_status_with_pagination(
         &self,
-        input: UserId,
+        input: InputFindStatusTeacherEntity,
         pagination: Pagination,
     ) -> Result<PaginatedTeachersListEntity, Error>;
+    // async fn find_all_with_pagination(
+    //     &self,
+    //     input: UserId,
+    //     pagination: Pagination,
+    // ) -> Result<PaginatedTeachersListEntity, Error>;
     async fn find_teacher(&self, input: InputFindTeacherEntity) -> Result<TeacherEntity, Error>;
     async fn update(&self, input: InputTeacherEntity) -> Result<TeacherId, Error>;
     async fn status_update(&self, input: InputPatchTeacherEntity) -> Result<TeacherId, Error>;
@@ -158,10 +169,10 @@ impl TeachersRepository for PostgresTeachersRepository {
         Ok(TeacherId::from(id))
     }
 
-    // todo: クエリパラメーターでstatusの値ごとの検索を追加
-    async fn find_all_with_pagination(
+    // クエリパラメーターでstatusの値ごとの検索
+    async fn find_status_with_pagination(
         &self,
-        input: UserId,
+        input: InputFindStatusTeacherEntity,
         pagination: Pagination,
     ) -> Result<PaginatedTeachersListEntity, Error> {
         let span = span!(
@@ -177,36 +188,14 @@ impl TeachersRepository for PostgresTeachersRepository {
         let teachers = sqlx::query_as!(
             TeacherEntity,
             r#"
-                SELECT 
-                    id,
-                    user_id,
-                    last_name,
-                    first_name,
-                    last_name_kana,
-                    first_name_kana,
-                    phone,
-                    mobile_phone,
-                    email,
-                    post_code1,
-                    post_code2,
-                    prefecture,
-                    city,
-                    street_address,
-                    building,
-                    prefectures_kana,
-                    city_kana,
-                    building_kana,
-                    hire_date,
-                    leave_date,
-                    status,
-                    created_at,
-                    updated_at
+                SELECT *
                 FROM teachers
-                WHERE user_id = $1::UUID
+                WHERE user_id = $1::UUID AND status = $2
                 ORDER BY created_at DESC
-                LIMIT $2 OFFSET $3
+                LIMIT $3 OFFSET $4
             "#,
-            input.clone().id(),
+            input.user_id.clone().id(),
+            input.status,
             pagination.limit,
             pagination.offset,
         )
@@ -218,9 +207,10 @@ impl TeachersRepository for PostgresTeachersRepository {
             r#"
                 SELECT COUNT(*)
                 FROM teachers
-                WHERE user_id = $1::UUID
+                WHERE user_id = $1::UUID AND status = $2
             "#,
-            input.id(),
+            input.user_id.id(),
+            input.status,
         )
         .fetch_one(&pool)
         .await
@@ -235,6 +225,61 @@ impl TeachersRepository for PostgresTeachersRepository {
         ))
     }
 
+    // note: すべてのステータスのページネーションのリストを取得する関数
+    // note: 複雑になりそうなので保留
+    // async fn find_all_with_pagination(
+    //     &self,
+    //     input: UserId,
+    //     pagination: Pagination,
+    // ) -> Result<PaginatedTeachersListEntity, Error> {
+    //     let span = span!(
+    //         Level::INFO,
+    //         "db_query_execution",
+    //         function = "find_all_with_pagination"
+    //     );
+    //     let _enter = span.enter();
+
+    //     let pool = self.0.get_pool();
+
+    //     info!("Start find_all_with_pagination TeachersEntity");
+    //     let teachers = sqlx::query_as!(
+    //         TeacherEntity,
+    //         r#"
+    //             SELECT *
+    //             FROM teachers
+    //             WHERE user_id = $1::UUID
+    //             ORDER BY created_at DESC
+    //             LIMIT $2 OFFSET $3
+    //         "#,
+    //         input.clone().id(),
+    //         pagination.limit,
+    //         pagination.offset,
+    //     )
+    //     .fetch_all(&pool)
+    //     .await
+    //     .map_err(Error::DatabaseError)?;
+
+    //     let total = sqlx::query_scalar!(
+    //         r#"
+    //             SELECT COUNT(*)
+    //             FROM teachers
+    //             WHERE user_id = $1::UUID
+    //         "#,
+    //         input.id(),
+    //     )
+    //     .fetch_one(&pool)
+    //     .await
+    //     .map_err(Error::DatabaseError)?;
+    //     info!("Successful search for TeachersEntity");
+
+    //     Ok(PaginatedTeachersListEntity::new(
+    //         teachers,
+    //         pagination.offset,
+    //         pagination.limit,
+    //         total,
+    //     ))
+    // }
+
     async fn find_teacher(&self, input: InputFindTeacherEntity) -> Result<TeacherEntity, Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "find_teacher");
         let _enter = span.enter();
@@ -245,30 +290,7 @@ impl TeachersRepository for PostgresTeachersRepository {
         let teacher = sqlx::query_as!(
             TeacherEntity,
             r#"
-                SELECT 
-                    id,
-                    user_id,
-                    last_name,
-                    first_name,
-                    last_name_kana,
-                    first_name_kana,
-                    phone,
-                    mobile_phone,
-                    email,
-                    post_code1,
-                    post_code2,
-                    prefecture,
-                    city,
-                    street_address,
-                    building,
-                    prefectures_kana,
-                    city_kana,
-                    building_kana,
-                    hire_date,
-                    leave_date,
-                    status,
-                    created_at,
-                    updated_at
+                SELECT *
                 FROM teachers
                 WHERE id = $1::UUID AND user_id = $2::UUID
             "#,
@@ -446,7 +468,7 @@ pub mod tests {
     }
 
     #[sqlx::test(migrations = "./migrations")]
-    async fn test_find_all_with_pagination(pool: PgPool) -> Result<()> {
+    async fn test_find_status_with_pagination(pool: PgPool) -> Result<()> {
         // ready
         let db = test_db_connector(pool.clone());
         let repo = PostgresTeachersRepository::new(Arc::new(db));
@@ -489,7 +511,10 @@ pub mod tests {
 
         // test
         let res = repo
-            .find_all_with_pagination(user.id, pagination)
+            .find_status_with_pagination(
+                InputFindStatusTeacherEntity::new(user.id, "active".to_string()),
+                pagination,
+            )
             .await
             .unwrap();
 
@@ -498,6 +523,62 @@ pub mod tests {
 
         Ok(())
     }
+
+    // note: すべてのステータスのページネーションのリストを取得する関数
+    // note: 複雑になりそうなので保留
+    // #[sqlx::test(migrations = "./migrations")]
+    // async fn test_find_all_with_pagination(pool: PgPool) -> Result<()> {
+    //     // ready
+    //     let db = test_db_connector(pool.clone());
+    //     let repo = PostgresTeachersRepository::new(Arc::new(db));
+
+    //     let expected_length = 3;
+    //     let expected_total = 100;
+
+    //     let pagination = Pagination {
+    //         limit: 10,
+    //         offset: 97,
+    //     };
+
+    //     let user = test_util_create_user(pool).await;
+
+    //     for _i in 1..=100 {
+    //         let input = InputTeacherEntity {
+    //             id: TeacherId::new_v4(),
+    //             user_id: user.id.clone(),
+    //             last_name: (1..=50).fake::<String>(),
+    //             first_name: (1..=50).fake::<String>(),
+    //             last_name_kana: Some("カタカナ".to_string()),
+    //             first_name_kana: Some("カタカナ".to_string()),
+    //             phone: Some((1..=15).fake::<String>()),
+    //             mobile_phone: Some((1..=15).fake::<String>()),
+    //             email: Some((1..=255).fake::<String>()),
+    //             post_code1: "666".to_string(),
+    //             post_code2: "6666".to_string(),
+    //             prefecture: (1..=30).fake::<String>(),
+    //             city: (1..=40).fake::<String>(),
+    //             street_address: (1..=100).fake::<String>(),
+    //             building: Some((1..=50).fake::<String>()),
+    //             prefectures_kana: Some("カタカナ".to_string()),
+    //             city_kana: Some("カタカナ".to_string()),
+    //             building_kana: Some("カタカナ".to_string()),
+    //             hire_date: Faker.fake::<NaiveDate>(),
+    //         };
+
+    //         repo.create(input).await.unwrap();
+    //     }
+
+    //     // test
+    //     let res = repo
+    //         .find_all_with_pagination(user.id, pagination)
+    //         .await
+    //         .unwrap();
+
+    //     assert_eq!(res.teachers.len(), expected_length);
+    //     assert_eq!(res.total, Some(expected_total));
+
+    //     Ok(())
+    // }
 
     #[sqlx::test(migrations = "./migrations")]
     async fn test_find_teacher(pool: PgPool) -> Result<()> {
