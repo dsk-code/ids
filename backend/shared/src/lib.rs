@@ -1,3 +1,4 @@
+pub mod structs;
 pub mod types;
 
 pub use crate::types::id::{Auth0Id, ClassId, UserId};

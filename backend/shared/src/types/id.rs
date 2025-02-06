@@ -53,3 +53,22 @@ impl ClassId {
         Self(Uuid::new_v4())
     }
 }
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+pub struct TeacherId(Uuid);
+
+impl From<Uuid> for TeacherId {
+    fn from(id: Uuid) -> Self {
+        Self(id)
+    }
+}
+
+impl TeacherId {
+    pub fn id(self) -> Uuid {
+        self.0
+    }
+
+    pub fn new_v4() -> Self {
+        Self(Uuid::new_v4())
+    }
+}

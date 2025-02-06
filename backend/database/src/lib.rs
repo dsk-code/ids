@@ -6,6 +6,7 @@ pub use repository::classes::{
     ClassEntity, ClassesRepository, InputClassEntity, InputDeleteClassEntity, InputFindClassEntity,
     InputUpdateClassEntity,
 };
+pub use repository::teachers::{PostgresTeachersRepository, TeacherEntity};
 pub use repository::users::{
     InputUpdateUserEntity, InputUserEntity, PostgresUserRepository, UserEntity, UserRepository,
 };

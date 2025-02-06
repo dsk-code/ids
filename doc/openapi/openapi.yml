@@ -92,7 +92,102 @@ paths:
             tags:
               - classes
 
+    /teachers:
+        get:
+            operationId: get-teachers
+            parameters:
+                - $ref: '#/components/parameters/TeachersStateQuery'
+                - $ref: '#/components/parameters/PagenationLimitQuery'
+                - $ref: '#/components/parameters/PagenationOffsetQuery'
+            responses:
+                '200':
+                    $ref: '#/components/responses/OkGetTeachersList'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - teachers
+        
+        post:
+            operationId: post-teachers
+            requestBody:
+                $ref: '#/components/requestBodies/PostTeachers'
+            responses:
+                '201':
+                    $ref: '#/components/responses/OkPostTeachers'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - teachers
+    
+    /teachers/{teacher_id}:
+        get:
+            operationId: get-teacher
+            parameters:
+                - $ref: '#/components/parameters/TeacherId'
+            responses:
+                '200':
+                    $ref: '#/components/responses/OkGetTeacher'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - teachers
+        
+        put:
+            operationId: put-Teacher
+            parameters:
+                - $ref: '#/components/parameters/TeacherId'
+            requestBody:
+                $ref: '#/components/requestBodies/PutTeacher'
+            responses:
+                '200':
+                    $ref: '#/components/responses/OkPutTeacher'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - teachers
+
+        patch:
+            operationId: patch-Teacher
+            parameters:
+                - $ref: '#/components/parameters/TeacherId'
+            requestBody:
+                $ref: '#/components/requestBodies/PatchTeacher'
+            responses:
+                '200':
+                    $ref: '#/components/responses/OkPatchTeacher'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - teachers
+              
+        delete:
+            operationId: delete-Teacher
+            parameters:
+                - $ref: '#/components/parameters/TeacherId'
+            responses:
+                '204':
+                    description: The teacher has been successfully deleted
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+            tags:
+              - teachers
+
 components:
+    #-------------------------------
+    # Reusable schemas (data models)
+    #-------------------------------
     schemas:
         PagenationLimit:
             type: integer
@@ -110,6 +205,14 @@ components:
         ClassId:
             type: string
             format: uuid
+        
+        TeacherId:
+            type: string
+            format: uuid
+        
+        TeachersStatus:
+            type: string
+            enum: [active, inactive]
 
         ResponseAuthUser:
             type: object
@@ -162,6 +265,78 @@ components:
             items:
                 $ref: '#/components/schemas/Class'
 
+        Teacher:
+            properties:
+                id:
+                    $ref: '#/components/schemas/TeacherId'
+                user_id:
+                    $ref: '#/components/schemas/UserId'
+                last_name:
+                    type: string
+                first_name:
+                    type: string
+                last_name_kana:
+                    type: string
+                first_name_kana:
+                    type: string
+                phone:
+                    type: string
+                mobile_phone:
+                    type: string
+                email:
+                    type: string
+                post_code1:
+                    type: string
+                post_code2:
+                    type: string
+                prefectures:
+                    type: string
+                city:
+                    type: string
+                street_address:
+                    type: string
+                building:
+                    type: string
+                prefectures_kana:
+                    type: string
+                city_kana:
+                    type: string
+                building_kana:
+                    type: string
+                hire_date:
+                    type: string
+                    format: date
+                leave_date:
+                    type: string
+                    format: date
+                status:
+                    type: string
+                created_at:
+                    type: string
+                    format: date-time
+                updated_at:
+                    type: string
+                    format: date-time
+            required:
+              - id
+              - user_id
+              - last_name
+              - first_name
+              - post_code1
+              - post_code2
+              - prefectures
+              - city
+              - street_address
+              - hire_date
+              - status
+              - created_at
+              - updated_at
+                
+        TeacherList:
+            type: array
+            items:
+                $ref: '#/components/schemas/Teacher'
+
         RequestClasses:
             type: object
             properties:
@@ -170,10 +345,135 @@ components:
                 age:
                     type: integer
             required:
-              - className
-              - age
-   
+                - className
+                - age
+
+        RequestPostTeachers:
+            type: object
+            properties:
+                last_name:
+                    type: string
+                first_name:
+                    type: string
+                last_name_kana:
+                    type: string
+                first_name_kana:
+                    type: string
+                phone:
+                    type: string
+                mobile_phone:
+                    type: string
+                email:
+                    type: string
+                post_code1:
+                    type: string
+                post_code2:
+                    type: string
+                prefectures:
+                    type: string
+                city:
+                    type: string
+                street_address:
+                    type: string
+                building:
+                    type: string
+                prefectures_kana:
+                    type: string
+                city_kana:
+                    type: string
+                building_kana:
+                    type: string
+                hire_date:
+                    type: string
+                    format: date
+            required:
+                - last_name
+                - first_name
+                - post_code1
+                - post_code2
+                - prefectures
+                - city
+                - street_address
+                - hire_date
+
+        RequestPutTeacher:
+            type: object
+            properties:
+                last_name:
+                    type: string
+                first_name:
+                    type: string
+                last_name_kana:
+                    type: string
+                first_name_kana:
+                    type: string
+                phone:
+                    type: string
+                mobile_phone:
+                    type: string
+                email:
+                    type: string
+                post_code1:
+                    type: string
+                post_code2:
+                    type: string
+                prefectures:
+                    type: string
+                city:
+                    type: string
+                street_address:
+                    type: string
+                building:
+                    type: string
+                prefectures_kana:
+                    type: string
+                city_kana:
+                    type: string
+                building_kana:
+                    type: string
+                hire_date:
+                    type: string
+                    format: date
+            required:
+                - last_name
+                - first_name
+                - post_code1
+                - post_code2
+                - prefectures
+                - city
+                - street_address
+                - hire_date
+
+        RequestPatchTeacher:
+            type: object
+            properties:
+                leave_date:
+                    type: string
+                    format: date
+                status:
+                    type: string
+            required:
+                - status
+
+    #-------------------------------
+    # Reusable operation parameters
+    #-------------------------------
+
     parameters:
+        PagenationLimitQuery:
+            name: limit
+            in: query
+            required: false
+            schema:
+              $ref: '#/components/schemas/PagenationLimit'
+
+        PagenationOffsetQuery:
+            name: offset
+            in: query
+            required: false
+            schema:
+              $ref: '#/components/schemas/PagenationOffset'
+
         ClassId:
             name: class_id
             in: path
@@ -181,6 +481,23 @@ components:
             schema:
                 $ref: '#/components/schemas/ClassId'
 
+        TeachersStateQuery:
+            name: status
+            in: query
+            required: false
+            schema:
+                $ref: '#/components/schemas/TeachersStatus'
+
+        TeacherId:
+            name: teacher_id
+            in: path
+            required: true
+            schema:
+                $ref: '#/components/schemas/TeacherId'
+    
+    #-------------------------------
+    # Reusable request bodies
+    #-------------------------------
     requestBodies:
         PostMe:
             description: post me
@@ -198,7 +515,33 @@ components:
                     schema:
                         $ref: '#/components/schemas/RequestClasses'
 
-  
+        PostTeachers:
+            description: post teachers
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/RequestPostTeachers'
+
+        PutTeacher:
+            description: put teacher
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/RequestPutTeacher'
+
+        PatchTeacher:
+            description: patch teacher
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/RequestPatchTeacher'
+
+    #-------------------------------
+    # Reusable responses bodies
+    #-------------------------------
     responses:
         OkGetMe:
             description: OK
@@ -234,6 +577,42 @@ components:
                 application/json:
                     schema:
                         $ref: '#/components/schemas/Class'
+
+        OkGetTeachersList:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/TeacherList'
+        
+        OkPostTeachers:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/TeacherId'
+
+        OkGetTeacher:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Teacher'
+        
+        OkPutTeacher:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/TeacherId'
+
+        OkPatchTeacher:
+            description: OK
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/TeacherId'
+
 
         NotFound:
             description: not found
