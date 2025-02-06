@@ -9,7 +9,7 @@ use chrono::{NaiveDate, NaiveDateTime};
 use derive_new::new;
 use std::sync::Arc;
 
-#[derive(Debug, new)]
+#[derive(Debug)]
 pub struct TeacherEntity {
     pub id: TeacherId,
     pub user_id: UserId,
@@ -44,31 +44,8 @@ pub struct PaginatedTeachersListEntity {
     pub total: Option<i64>,
 }
 
-#[derive(Debug, new)]
+#[derive(Debug, Clone)]
 pub struct InputTeacherEntity {
-    pub id: TeacherId,
-    pub user_id: UserId,
-    pub last_name: String,
-    pub first_name: String,
-    pub last_name_kana: Option<String>,
-    pub first_name_kana: Option<String>,
-    pub phone: Option<String>,
-    pub mobile_phone: Option<String>,
-    pub email: Option<String>,
-    pub post_code1: String,
-    pub post_code2: String,
-    pub prefecture: String,
-    pub city: String,
-    pub street_address: String,
-    pub building: Option<String>,
-    pub prefectures_kana: Option<String>,
-    pub city_kana: Option<String>,
-    pub building_kana: Option<String>,
-    pub hire_date: NaiveDate,
-}
-
-#[derive(Debug, new)]
-pub struct InputUpdateTeacherEntity {
     pub id: TeacherId,
     pub user_id: UserId,
     pub last_name: String,
@@ -119,7 +96,7 @@ pub trait TeachersRepository {
         pagination: Pagination,
     ) -> Result<PaginatedTeachersListEntity, Error>;
     async fn find_teacher(&self, input: InputFindTeacherEntity) -> Result<TeacherEntity, Error>;
-    async fn update(&self, input: InputUpdateTeacherEntity) -> Result<TeacherId, Error>;
+    async fn update(&self, input: InputTeacherEntity) -> Result<TeacherId, Error>;
     async fn status_update(&self, input: InputPatchTeacherEntity) -> Result<TeacherId, Error>;
     async fn delete(&self, input: InputDeleteTeacherEntity) -> Result<(), Error>;
 }
@@ -300,7 +277,7 @@ impl TeachersRepository for PostgresTeachersRepository {
         Ok(teacher)
     }
 
-    async fn update(&self, input: InputUpdateTeacherEntity) -> Result<TeacherId, Error> {
+    async fn update(&self, input: InputTeacherEntity) -> Result<TeacherId, Error> {
         let span = span!(Level::INFO, "db_query_execution", function = "update");
         let _enter = span.enter();
 
@@ -457,6 +434,305 @@ pub mod tests {
         // test
         let res = repo.create(input).await;
 
+        assert!(res.is_ok());
+
+        Ok(())
+    }
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_find_all_with_pagination(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresTeachersRepository::new(Arc::new(db));
+
+        let expected_length = 3;
+        let expected_total = 100;
+
+        let pagination = Pagination {
+            limit: 10,
+            offset: 97,
+        };
+
+        let user = test_util_create_user(pool).await;
+
+        for _i in 1..=100 {
+            let input = InputTeacherEntity {
+                id: TeacherId::new_v4(),
+                user_id: user.id.clone(),
+                last_name: (1..=50).fake::<String>(),
+                first_name: (1..=50).fake::<String>(),
+                last_name_kana: Some("カタカナ".to_string()),
+                first_name_kana: Some("カタカナ".to_string()),
+                phone: Some((1..=15).fake::<String>()),
+                mobile_phone: Some((1..=15).fake::<String>()),
+                email: Some((1..=255).fake::<String>()),
+                post_code1: "666".to_string(),
+                post_code2: "6666".to_string(),
+                prefecture: (1..=30).fake::<String>(),
+                city: (1..=40).fake::<String>(),
+                street_address: (1..=100).fake::<String>(),
+                building: Some((1..=50).fake::<String>()),
+                prefectures_kana: Some("カタカナ".to_string()),
+                city_kana: Some("カタカナ".to_string()),
+                building_kana: Some("カタカナ".to_string()),
+                hire_date: Faker.fake::<NaiveDate>(),
+            };
+
+            repo.create(input).await.unwrap();
+        }
+
+        // test
+        let res = repo
+            .find_all_with_pagination(user.id, pagination)
+            .await
+            .unwrap();
+
+        assert_eq!(res.teachers.len(), expected_length);
+        assert_eq!(res.total, Some(expected_total));
+
+        Ok(())
+    }
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_find_teacher(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresTeachersRepository::new(Arc::new(db));
+
+        let user = test_util_create_user(pool).await;
+
+        let expected_input = InputTeacherEntity {
+            id: TeacherId::new_v4(),
+            user_id: user.id.clone(),
+            last_name: (1..=50).fake::<String>(),
+            first_name: (1..=50).fake::<String>(),
+            last_name_kana: Some("カタカナ".to_string()),
+            first_name_kana: Some("カタカナ".to_string()),
+            phone: Some((1..=15).fake::<String>()),
+            mobile_phone: Some((1..=15).fake::<String>()),
+            email: Some((1..=255).fake::<String>()),
+            post_code1: "666".to_string(),
+            post_code2: "6666".to_string(),
+            prefecture: (1..=30).fake::<String>(),
+            city: (1..=40).fake::<String>(),
+            street_address: (1..=100).fake::<String>(),
+            building: Some((1..=50).fake::<String>()),
+            prefectures_kana: Some("カタカナ".to_string()),
+            city_kana: Some("カタカナ".to_string()),
+            building_kana: Some("カタカナ".to_string()),
+            hire_date: Faker.fake::<NaiveDate>(),
+        };
+
+        let expected_teacher_id = repo.create(expected_input.clone()).await.unwrap();
+
+        for _i in 1..100 {
+            let input = InputTeacherEntity {
+                id: TeacherId::new_v4(),
+                user_id: user.id.clone(),
+                last_name: (1..=50).fake::<String>(),
+                first_name: (1..=50).fake::<String>(),
+                last_name_kana: Some("カタカナ".to_string()),
+                first_name_kana: Some("カタカナ".to_string()),
+                phone: Some((1..=15).fake::<String>()),
+                mobile_phone: Some((1..=15).fake::<String>()),
+                email: Some((1..=255).fake::<String>()),
+                post_code1: "666".to_string(),
+                post_code2: "6666".to_string(),
+                prefecture: (1..=30).fake::<String>(),
+                city: (1..=40).fake::<String>(),
+                street_address: (1..=100).fake::<String>(),
+                building: Some((1..=50).fake::<String>()),
+                prefectures_kana: Some("カタカナ".to_string()),
+                city_kana: Some("カタカナ".to_string()),
+                building_kana: Some("カタカナ".to_string()),
+                hire_date: Faker.fake::<NaiveDate>(),
+            };
+
+            repo.create(input).await.unwrap();
+        }
+
+        // test
+        let res = repo
+            .find_teacher(InputFindTeacherEntity::new(expected_teacher_id, user.id))
+            .await
+            .unwrap();
+
+        assert_eq!(res.id, expected_input.id);
+        assert_eq!(res.first_name, expected_input.first_name);
+        assert_eq!(res.email, expected_input.email);
+
+        Ok(())
+    }
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_update(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresTeachersRepository::new(Arc::new(db));
+
+        let expected_post_code1 = "888".to_string();
+        let expected_post_code2 = "8888".to_string();
+
+        let user = test_util_create_user(pool).await;
+
+        let input = InputTeacherEntity {
+            id: TeacherId::new_v4(),
+            user_id: user.id.clone(),
+            last_name: (1..=50).fake::<String>(),
+            first_name: (1..=50).fake::<String>(),
+            last_name_kana: Some("カタカナ".to_string()),
+            first_name_kana: Some("カタカナ".to_string()),
+            phone: Some((1..=15).fake::<String>()),
+            mobile_phone: Some((1..=15).fake::<String>()),
+            email: Some((1..=255).fake::<String>()),
+            post_code1: "666".to_string(),
+            post_code2: "6666".to_string(),
+            prefecture: (1..=30).fake::<String>(),
+            city: (1..=40).fake::<String>(),
+            street_address: (1..=100).fake::<String>(),
+            building: Some((1..=50).fake::<String>()),
+            prefectures_kana: Some("カタカナ".to_string()),
+            city_kana: Some("カタカナ".to_string()),
+            building_kana: Some("カタカナ".to_string()),
+            hire_date: Faker.fake::<NaiveDate>(),
+        };
+
+        let teacher_id = repo.create(input.clone()).await.unwrap();
+
+        let expected_input = InputTeacherEntity {
+            id: teacher_id.clone(),
+            user_id: user.id.clone(),
+            last_name: (1..=50).fake::<String>(),
+            first_name: (1..=50).fake::<String>(),
+            last_name_kana: Some("カタカナ".to_string()),
+            first_name_kana: Some("カタカナ".to_string()),
+            phone: Some((1..=15).fake::<String>()),
+            mobile_phone: Some((1..=15).fake::<String>()),
+            email: Some((1..=255).fake::<String>()),
+            post_code1: expected_post_code1.clone(),
+            post_code2: expected_post_code2.clone(),
+            prefecture: (1..=30).fake::<String>(),
+            city: (1..=40).fake::<String>(),
+            street_address: (1..=100).fake::<String>(),
+            building: Some((1..=50).fake::<String>()),
+            prefectures_kana: Some("カタカナ".to_string()),
+            city_kana: Some("カタカナ".to_string()),
+            building_kana: Some("カタカナ".to_string()),
+            hire_date: Faker.fake::<NaiveDate>(),
+        };
+
+        // test
+        let res = repo.update(expected_input).await;
+
+        assert!(res.is_ok());
+
+        let result = repo
+            .find_teacher(InputFindTeacherEntity::new(teacher_id.clone(), user.id))
+            .await
+            .unwrap();
+
+        assert_eq!(result.id, teacher_id);
+        assert_eq!(result.post_code1, expected_post_code1);
+        assert_eq!(result.post_code2, expected_post_code2);
+
+        Ok(())
+    }
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_status_update(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresTeachersRepository::new(Arc::new(db));
+
+        let expected_leave_date = Faker.fake::<NaiveDate>();
+        let expected_status = "inactive".to_string();
+
+        let user = test_util_create_user(pool).await;
+
+        let input = InputTeacherEntity {
+            id: TeacherId::new_v4(),
+            user_id: user.id.clone(),
+            last_name: (1..=50).fake::<String>(),
+            first_name: (1..=50).fake::<String>(),
+            last_name_kana: Some("カタカナ".to_string()),
+            first_name_kana: Some("カタカナ".to_string()),
+            phone: Some((1..=15).fake::<String>()),
+            mobile_phone: Some((1..=15).fake::<String>()),
+            email: Some((1..=255).fake::<String>()),
+            post_code1: "666".to_string(),
+            post_code2: "6666".to_string(),
+            prefecture: (1..=30).fake::<String>(),
+            city: (1..=40).fake::<String>(),
+            street_address: (1..=100).fake::<String>(),
+            building: Some((1..=50).fake::<String>()),
+            prefectures_kana: Some("カタカナ".to_string()),
+            city_kana: Some("カタカナ".to_string()),
+            building_kana: Some("カタカナ".to_string()),
+            hire_date: Faker.fake::<NaiveDate>(),
+        };
+
+        let teacher_id = repo.create(input.clone()).await.unwrap();
+
+        let update_input = InputPatchTeacherEntity {
+            id: teacher_id.clone(),
+            user_id: user.id.clone(),
+            leave_date: Some(expected_leave_date),
+            status: expected_status.clone(),
+        };
+
+        // test
+        let res = repo.status_update(update_input).await;
+
+        assert!(res.is_ok());
+
+        let result = repo
+            .find_teacher(InputFindTeacherEntity::new(teacher_id.clone(), user.id))
+            .await
+            .unwrap();
+
+        assert_eq!(result.id, teacher_id);
+        assert_eq!(result.leave_date, Some(expected_leave_date));
+        assert_eq!(result.status, expected_status);
+
+        Ok(())
+    }
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_delete(pool: PgPool) -> Result<()> {
+        // ready
+        let db = test_db_connector(pool.clone());
+        let repo = PostgresTeachersRepository::new(Arc::new(db));
+
+        let user = test_util_create_user(pool).await;
+
+        let input = InputTeacherEntity {
+            id: TeacherId::new_v4(),
+            user_id: user.id.clone(),
+            last_name: (1..=50).fake::<String>(),
+            first_name: (1..=50).fake::<String>(),
+            last_name_kana: Some("カタカナ".to_string()),
+            first_name_kana: Some("カタカナ".to_string()),
+            phone: Some((1..=15).fake::<String>()),
+            mobile_phone: Some((1..=15).fake::<String>()),
+            email: Some((1..=255).fake::<String>()),
+            post_code1: "666".to_string(),
+            post_code2: "6666".to_string(),
+            prefecture: (1..=30).fake::<String>(),
+            city: (1..=40).fake::<String>(),
+            street_address: (1..=100).fake::<String>(),
+            building: Some((1..=50).fake::<String>()),
+            prefectures_kana: Some("カタカナ".to_string()),
+            city_kana: Some("カタカナ".to_string()),
+            building_kana: Some("カタカナ".to_string()),
+            hire_date: Faker.fake::<NaiveDate>(),
+        };
+
+        let teacher_id = repo.create(input.clone()).await.unwrap();
+
+        // test
+        let res = repo
+            .delete(InputDeleteTeacherEntity::new(teacher_id, user.id))
+            .await;
         assert!(res.is_ok());
 
         Ok(())
