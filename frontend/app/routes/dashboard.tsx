@@ -54,7 +54,7 @@ export default function DashboardLayout() {
                 gap="md"
               >
                 <Link to="/dashboard" className="font-medium text-black select-none" onClick={close}>dashboard</Link>
-                <Link to="/dashboard/classList" className="font-medium text-black select-none" onClick={close}>クラス一覧</Link>
+                <Link to="/dashboard/classes" className="font-medium text-black select-none" onClick={close}>クラス一覧</Link>
               </Stack>
               </AppShell.Navbar>
 

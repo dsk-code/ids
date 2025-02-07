@@ -14,7 +14,7 @@ export const DrawerMenuButton: React.FC = () => {
             <Drawer position="right" size="xs" opened={opened} onClose={close} title="Menu">
               <Stack align="flex-start" justify="flex-start">
                 <Link to="/dashboard" className="font-medium text-black select-none" onClick={close}>dashboard</Link>
-                <Link to="/dashboard/classList" className="font-medium text-black select-none" onClick={close}>クラス一覧</Link>
+                <Link to="/dashboard/classes" className="font-medium text-black select-none" onClick={close}>クラス一覧</Link>
                 <Auth0NavButtons />
               </Stack>
             </Drawer>
