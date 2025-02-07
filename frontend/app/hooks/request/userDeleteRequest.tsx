@@ -1,15 +1,13 @@
 import { useAuth0 } from "@auth0/auth0-react"
-import useEnv from "../useEnv";
 import { useAccessToken } from "../accesstoken/useAccessToken";
-import { Class, RequestPutClass } from "~/types/classTypes";
-import { putData } from "~/api/api";
+import { deleteData } from "~/api/api";
+import { DeleteRequestParts, GetRequestParts } from "~/types/requestPartsTypes";
 
-export const usePutClass = () => {
+export const useDeleteRequest = () => {
     const { isAuthenticated } = useAuth0();
     const { getAccessToken, isLoading, setIsLoading } = useAccessToken();
-    const { backendApiUrl } = useEnv();
 
-    const putClass = async (classId: string, payload: RequestPutClass) => {
+    const deleteRequest = async (parts: DeleteRequestParts) => {
         if (!isAuthenticated) {
             console.error("User is not authenticated");
             return { success: false, message: "User is not authenticated" };
@@ -19,18 +17,18 @@ export const usePutClass = () => {
         try {
             // アクセストークンの取得
             const accessToken = await getAccessToken();
-
-            console.log(payload);
+        
             if (accessToken) {
                 // APIにPOSTリクエスト
                 console.log("リクエスト開始");
-                const response = await putData<Class>(
-                    `${backendApiUrl}/classes/${classId}`,
-                    payload,
+                const response = await deleteData(
+                    parts.apiPath,
                     accessToken
                 );
                 console.log("Response:", response);
-                return { success: true, data: response };
+                if (response.status === 204) {
+                    return { success: true, message: "削除されました。" };
+                }
             }
         } catch (e) {
             const errorMessage = e instanceof Error ? e.message : "An unknown error occurred";
@@ -41,5 +39,5 @@ export const usePutClass = () => {
         }
     }
 
-    return { putClass, isLoading };
+    return { deleteRequest, isLoading, setIsLoading }
 }

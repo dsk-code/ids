@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE teachers\n                SET leave_date = $1, status = $2\n                WHERE user_id = $3::UUID AND id = $4::UUID\n                RETURNING id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Varchar",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c22b317905ce9a685fbeb8f9015c1902edb7445f7f1380f3a23f29abd0e6ab23"
+}

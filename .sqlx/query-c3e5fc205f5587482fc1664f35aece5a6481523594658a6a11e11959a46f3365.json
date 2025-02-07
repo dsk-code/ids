@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE teachers\n                SET \n                    last_name = $1,\n                    first_name = $2,\n                    last_name_kana = $3,\n                    first_name_kana = $4,\n                    phone = $5,\n                    mobile_phone = $6,\n                    email = $7,\n                    post_code1 = $8,\n                    post_code2 = $9,\n                    prefecture = $10,\n                    city = $11,\n                    street_address = $12,\n                    building = $13,\n                    prefectures_kana = $14,\n                    city_kana = $15,\n                    building_kana = $16,\n                    hire_date = $17\n                WHERE user_id = $18::UUID AND id = $19::UUID\n                RETURNING id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Date",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c3e5fc205f5587482fc1664f35aece5a6481523594658a6a11e11959a46f3365"
+}

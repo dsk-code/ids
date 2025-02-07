@@ -1,14 +1,14 @@
 import { useAuth0 } from "@auth0/auth0-react"
 import { useAccessToken } from "../accesstoken/useAccessToken";
-import useEnv from "../useEnv";
-import { deleteData, postData } from "~/api/api";
+import { patchData } from "~/api/api";
+import { ResponseEntity } from "~/types/responseTypes";
+import { PatchRequestParts } from "~/types/requestPartsTypes";
 
-export const useDeleteClass = () => {
+export const usePatchRequest = () => {
     const { isAuthenticated } = useAuth0();
     const { getAccessToken, isLoading, setIsLoading } = useAccessToken();
-    const { backendApiUrl } = useEnv();
 
-    const deleteClass = async (classId: string) => {
+    const patchRequest = async <T extends ResponseEntity>(parts: PatchRequestParts) => {
         if (!isAuthenticated) {
             console.error("User is not authenticated");
             return { success: false, message: "User is not authenticated" };
@@ -22,14 +22,13 @@ export const useDeleteClass = () => {
             if (accessToken) {
                 // APIにPOSTリクエスト
                 console.log("リクエスト開始");
-                const response = await deleteData(
-                    `${backendApiUrl}/classes/${classId}`,
+                const response = await patchData<T>(
+                    parts.apiPath,
+                    parts.payload,
                     accessToken
                 );
                 console.log("Response:", response);
-                if (response.status === 204) {
-                    return { success: true, message: "削除されました。" };
-                }
+                return { success: true, data: response };
             }
         } catch (e) {
             const errorMessage = e instanceof Error ? e.message : "An unknown error occurred";
@@ -40,5 +39,5 @@ export const useDeleteClass = () => {
         }
     }
 
-    return { deleteClass, isLoading }
+    return { patchRequest, isLoading, setIsLoading }
 }

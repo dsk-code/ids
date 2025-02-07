@@ -1,47 +1,41 @@
 import { Modal, Button, Container, TextInput, Space, Group } from '@mantine/core';
 import { TbChevronDown } from 'react-icons/tb';
-import { useForm } from '@mantine/form';
+import { UseFormReturnType } from '@mantine/form';
 import React from 'react';
-import { RequestPostClass, RequestPutClass } from '~/types/classTypes';
-import { useDisclosure } from '@mantine/hooks';
-import { useRecoilState } from 'recoil';
-import { classListState } from '~/recoil/atoms';
-import { usePostClass } from '~/hooks/class/usePostClass';
 
-export const CreateClassModal: React.FC = () => {
-    const { postClass } = usePostClass();
-    const [opened, handlers] = useDisclosure(false);
-    const [classList, setClassList] = useRecoilState(classListState);
-    const form = useForm({
-        mode: 'uncontrolled',
-        initialValues: {
-            className: "",
-            age: "0",
-        }
-    });
+interface Props {
+    opened: boolean;
+    handlers: {
+        readonly open: () => void;
+        readonly close: () => void;
+        readonly toggle: () => void;
+    };
+    handleCreate: (values: {
+        className: string;
+        age: string;
+    }) => Promise<void>;
+    form: UseFormReturnType<{
+        className: string;
+        age: string;
+    }, (values: {
+        className: string;
+        age: string;
+    }) => {
+        className: string;
+        age: string;
+    }>;
+}
 
-    const handleCreate = async (values: typeof form.values) => {
-        const age = parseInt(values.age, 10);
-        const payload: RequestPostClass = {
-            className: values.className,
-            age,
-        }
-
-        const response = await postClass(payload);
-
-        if (response?.success) {
-            if (response.data) {
-                setClassList([...classList, response.data]);
-                handlers.close();
-            }
-        } else {
-            console.log(response?.message);
-        }
-    }
+export const CreateClassModal: React.FC<Props> = ({
+    opened,
+    handlers,
+    handleCreate,
+    form
+}) => {
     
     return (
         <>
-            <Modal opened={opened} onClose={handlers.close} title="クラス編集">
+            <Modal opened={opened} onClose={handlers.close} title="クラス作成">
                 <Container size="xs">
                     <form onSubmit={form.onSubmit(handleCreate)}>
                         <div>

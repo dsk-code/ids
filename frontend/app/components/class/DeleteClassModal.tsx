@@ -1,8 +1,6 @@
 import { Button, Container, Group, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import React from "react";
-import { useAccessToken } from "~/hooks/accesstoken/useAccessToken";
-import { useDeleteClass } from "~/hooks/class/useDeleteClass";
 
 interface Props {
     className: string;
@@ -12,11 +10,6 @@ interface Props {
 
 export const DeleteClassModal: React.FC<Props> = ({ className, age, handleDelete}) => {
     const [opened, { open, close }] = useDisclosure(false);
-    const { deleteClass } = useDeleteClass();
-
-    // const handleDelete = async () => {
-    //     const response = await deleteClass();
-    // }
 
     return (
         <>

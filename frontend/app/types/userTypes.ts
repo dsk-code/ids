@@ -12,5 +12,5 @@ export interface AuthUser {
 
 export interface ResponseAuthUser {
     id: string;
-   auth0UserName: string;
+    auth0UserName: string;
 }
