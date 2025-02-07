@@ -1,19 +1,21 @@
 import { Modal, Button, Container, TextInput, Space, Group } from '@mantine/core';
 import { TbChevronDown } from 'react-icons/tb';
-import { useForm } from '@mantine/form';
+import { useForm, UseFormReturnType } from '@mantine/form';
 import React from 'react';
 
 interface Props {
     className: string;
     age: number;
     opened: boolean;
-    open: () => void;
-    close: () => void;
+    handlers: {
+        readonly open: () => void;
+        readonly close: () => void;
+        readonly toggle: () => void;
+    }
     handleEdit: (values: {className: string; age: string}) => Promise<void>;
 }
 
-export const EditClassModal: React.FC<Props> = ({ className, age, opened, open, close, handleEdit }) => {
-    
+export const EditClassModal: React.FC<Props> = ({ className, age, opened, handlers, handleEdit }) => {
     const form = useForm({
         mode: 'uncontrolled',
         initialValues: {
@@ -24,7 +26,7 @@ export const EditClassModal: React.FC<Props> = ({ className, age, opened, open, 
     
     return (
         <>
-            <Modal opened={opened} onClose={close} title="クラス編集">
+            <Modal opened={opened} onClose={handlers.close} title="クラス編集">
                 <Container size="xs">
                     <form onSubmit={form.onSubmit(handleEdit)}>
                         <div>
@@ -51,7 +53,7 @@ export const EditClassModal: React.FC<Props> = ({ className, age, opened, open, 
                         <div>
                             <Space h="md" />
                             <Group justify="flex-end">
-                                <Button variant="outline" color="lime" radius="md" onClick={close} >キャンセル</Button> 
+                                <Button variant="outline" color="lime" radius="md" onClick={handlers.close} >キャンセル</Button> 
                                 <Button variant="filled" color="violet" radius="md" type='submit'>送信</Button> 
                             </Group>
                         </div>
@@ -59,7 +61,7 @@ export const EditClassModal: React.FC<Props> = ({ className, age, opened, open, 
                 </Container>
             </Modal>
 
-            <Button variant="filled" color="green" size="xs" onClick={open}>
+            <Button variant="filled" color="green" size="xs" onClick={handlers.open}>
                 編集
             </Button>
         </>

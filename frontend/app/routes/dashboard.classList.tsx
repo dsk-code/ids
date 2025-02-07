@@ -1,58 +1,73 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Card, Center, Container, Group, Space, Text } from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { useDisclosure } from "@mantine/hooks";
 import { Link } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRecoilState } from "recoil";
-import { getData } from "~/api/api";
 import { CreateClassModal } from "~/components/class/CreateClassModal";
 import { PageLoader } from "~/components/common/PageLoader";
+import { useGetRequest } from "~/hooks/request/useGetRequest";
+import { usePostRequest } from "~/hooks/request/usePostRequest";
 import useEnv from "~/hooks/useEnv";
 import { classListState } from "~/recoil/atoms";
-import { Class } from "~/types/classTypes";
+import { Class, RequestPostClass } from "~/types/classTypes";
+import { GetRequestParts, PostRequestParts } from "~/types/requestPartsTypes";
 
 export default function ClassList() {
-    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
-    const [isLoading, setIsLoading] = useState(false);
-    const { audience, backendApiUrl } = useEnv();
+    const { isAuthenticated } = useAuth0();
+    const { backendApiUrl } = useEnv();
     const [classList, setClassList] = useRecoilState(classListState);
+    const { getRequest, isLoading, setIsLoading } = useGetRequest();
+    const { postRequest } = usePostRequest();
+    const [opened, handlers] = useDisclosure(false);
+    const form = useForm({
+        mode: 'uncontrolled',
+        initialValues: {
+            className: "",
+            age: "0",
+        }
+    });
 
     useEffect(() => {
         const fetchClassList = async () => {
             setIsLoading(true);
-            try {
-                // アクセストークンの取得
-                console.log("アクセストークンのリクエスト開始");
-                const accessToken = await getAccessTokenSilently({
-                    authorizationParams: {
-                        audience: audience,
-                    },
-                }).catch((error) => {
-                    console.error('アクセストークンの取得に失敗しました:', error);
-                });
-                console.log(accessToken);
-        
-                if (accessToken) {
-                    // APIにPOSTリクエスト
-                    console.log("クラスリストのリクエスト開始");
-                    const response = await getData<Class[]>(
-                        `${backendApiUrl}/classes`,
-                        accessToken
-                    );
-                    console.log("Response:", response);
-                    setClassList(response);
-                }
-            } catch (e) {
-                if (e instanceof Error) {
-                    console.log(e.message);
-                } else {
-                    console.log("An unknown error occurred");
-                }
-            } finally {
-                setIsLoading(false);
+            const parts: GetRequestParts = {
+                apiPath: `${backendApiUrl}/classes`,
+            }
+            const response = await getRequest<Class[]>(parts);
+            if (response?.success && response?.data) {
+                setClassList(response.data);
+            } else {
+                console.error(response?.message);
             }
         };
         fetchClassList();
+        setIsLoading(false);
     }, [classList.length]);
+
+    const handleCreate = async (values: typeof form.values) => {
+        const age = parseInt(values.age, 10);
+        const payload: RequestPostClass = {
+            className: values.className,
+            age,
+        }
+        const parts: PostRequestParts = {
+            apiPath: `${backendApiUrl}/classes`,
+            payload
+        }
+
+        const response = await postRequest<Class>(parts);
+
+        if (response?.success) {
+            if (response.data) {
+                setClassList([...classList, response.data]);
+                handlers.close();
+            }
+        } else {
+            console.log(response?.message);
+        }
+    }
 
     if (isLoading) {
         return ( <PageLoader /> );
@@ -66,14 +81,7 @@ export default function ClassList() {
                     <Container size="xs">
                         <Group justify="space-between">
                             <h1>クラス一覧</h1>
-                            <CreateClassModal />
-                            {/* <Button
-                            variant="gradient"
-                            gradient={{ from: 'teal', to: 'gray', deg: 0 }}
-                            onClick={handleCreate}
-                            >
-                            新規作成
-                            </Button> */}
+                            <CreateClassModal opened={opened} handlers={handlers} handleCreate={handleCreate} form={form}/>
                         </Group>
                         <ul>
                             {classList && (
@@ -95,7 +103,7 @@ export default function ClassList() {
                     <Center>
                         <Group justify="space-between">
                             <Text c="red">クラスが登録されていません</Text>
-                            <CreateClassModal />
+                            <CreateClassModal opened={opened} handlers={handlers} handleCreate={handleCreate} form={form}/>
                         </Group>
                     </Center>
                 </>

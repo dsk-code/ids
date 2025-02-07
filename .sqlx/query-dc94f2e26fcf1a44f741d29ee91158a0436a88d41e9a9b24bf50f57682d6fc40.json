@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT id, auth0_id, auth0_user_name, auth0_user_email\n                FROM users\n                WHERE auth0_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "auth0_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "auth0_user_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "auth0_user_email",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "dc94f2e26fcf1a44f741d29ee91158a0436a88d41e9a9b24bf50f57682d6fc40"
+}

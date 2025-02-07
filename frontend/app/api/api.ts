@@ -1,10 +1,3 @@
-// src/api.ts
-// export interface ApiResponse<T> {
-//     success: boolean;
-//     data: T;
-//     message?: string;
-//   }
-  
 export const getData = async <T>(
     url: string,
     token: string
@@ -52,6 +45,27 @@ export const putData = async <T>(
 ): Promise<T> => {
     const response = await fetch(url, {
         method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 認証トークン
+        },
+        body: JSON.stringify(data),
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+  
+    return response.json();
+};
+
+export const patchData = async <T>(
+    url: string,
+    data: object,
+    token: string
+): Promise<T> => {
+    const response = await fetch(url, {
+        method: "PATCH",
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`, // 認証トークン
