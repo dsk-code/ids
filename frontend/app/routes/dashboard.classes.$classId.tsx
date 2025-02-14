@@ -15,7 +15,8 @@ import { notifications } from '@mantine/notifications';
 import { useGetRequest } from '~/hooks/request/useGetRequest';
 import { DeleteRequestParts, GetRequestParts, PutRequestParts } from '~/types/requestPartsTypes';
 import { usePutRequest } from '~/hooks/request/usePutRequest';
-import { useDeleteRequest } from '~/hooks/request/userDeleteRequest';
+import { useDeleteRequest } from '~/hooks/request/useDeleteRequest';
+import { useFrontPageLinkPath } from '~/hooks/useFrontPageLinkPath';
 
 // todo: isDeletedが必要なのかを検討
 export default function ClassDetails() {
@@ -28,6 +29,7 @@ export default function ClassDetails() {
     const [isDeleted, setIsDeleted] = useState(false);
     const [opened, handlers] = useDisclosure(false);
     const navigate = useNavigate();
+    const { frontPageLinkPath } = useFrontPageLinkPath();
     const form = useForm({
         mode: 'uncontrolled',
         initialValues: {
@@ -56,7 +58,7 @@ export default function ClassDetails() {
             fetchClass();
             setIsLoading(false);
         }
-    }, [isDeleted, params.classId]);
+    }, [isDeleted, params.classId, EditClassModal]);
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -94,7 +96,7 @@ export default function ClassDetails() {
             const response = await deleteRequest(parts);
             
             if (response?.success) {
-                navigate("/dashboard/classList");
+                navigate(frontPageLinkPath.classesPath);
                 handlers.close();
                 return notifications.show({
                     title: "通知", 

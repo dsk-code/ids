@@ -1,7 +1,7 @@
 import { Modal, Button, Container, TextInput, Space, Group } from '@mantine/core';
 import { TbChevronDown } from 'react-icons/tb';
-import { useForm, UseFormReturnType } from '@mantine/form';
-import React from 'react';
+import { useForm } from '@mantine/form';
+import React, { SetStateAction } from 'react';
 
 interface Props {
     className: string;
@@ -23,6 +23,15 @@ export const EditClassModal: React.FC<Props> = ({ className, age, opened, handle
             age: age.toString(),
         }
     });
+
+    const handleClick = () => {
+        const values: SetStateAction<Partial<{ className: string; age: string; }>> = {
+            className,
+            age: age.toString(),
+        };
+        form.setValues(values);
+        handlers.open();
+    }
     
     return (
         <>
@@ -61,7 +70,7 @@ export const EditClassModal: React.FC<Props> = ({ className, age, opened, handle
                 </Container>
             </Modal>
 
-            <Button variant="filled" color="green" size="xs" onClick={handlers.open}>
+            <Button variant="filled" color="green" size="xs" onClick={handleClick}>
                 編集
             </Button>
         </>

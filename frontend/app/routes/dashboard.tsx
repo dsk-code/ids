@@ -5,10 +5,12 @@ import { AppShell, Burger, Button, Drawer, Group, Notification, Stack, Text } fr
 import { useDisclosure } from '@mantine/hooks';
 import { DrawerMenuButton } from '~/components/common/DrawerMenuButton';
 import { PageLoader } from '~/components/common/PageLoader';
+import { useFrontPageLinkPath } from "~/hooks/useFrontPageLinkPath";
 
 export default function DashboardLayout() {
     const { isLoading } = useAuth0();
     const [opened, { toggle, open, close }] = useDisclosure();
+    const { frontPageLinkPath } = useFrontPageLinkPath();
 
     if (isLoading) {
       return (
@@ -53,8 +55,8 @@ export default function DashboardLayout() {
                 justify="flex-start"
                 gap="md"
               >
-                <Link to="/dashboard" className="font-medium text-black select-none" onClick={close}>dashboard</Link>
-                <Link to="/dashboard/classes" className="font-medium text-black select-none" onClick={close}>クラス一覧</Link>
+                <Link to={frontPageLinkPath.dashboardPath} className="font-medium text-black select-none" onClick={close}>dashboard</Link>
+                <Link to={frontPageLinkPath.classesPath} className="font-medium text-black select-none" onClick={close}>クラス一覧</Link>
               </Stack>
               </AppShell.Navbar>
 

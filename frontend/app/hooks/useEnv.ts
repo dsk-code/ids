@@ -6,6 +6,7 @@ interface EnvVariables {
     VITE_AUTH0_SCOPE: string;
     VITE_AUTH0_APP_DOMEIN: string;
     VITE_BACKEND_API_URL: string;
+    VITE_ZIPCLOUD_URL: string;
 }
   
 const useEnv = () => {
@@ -20,6 +21,7 @@ const useEnv = () => {
         scope: env.VITE_AUTH0_SCOPE || "",
         appDmain: env.VITE_AUTH0_APP_DOMEIN || "",
         backendApiUrl: env.VITE_BACKEND_API_URL || "",
+        zipcloudUrl: env.VITE_ZIPCLOUD_URL || "",
     };
 };
   

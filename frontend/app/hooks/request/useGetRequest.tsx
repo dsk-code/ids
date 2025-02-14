@@ -3,6 +3,7 @@ import { useAccessToken } from "../accesstoken/useAccessToken";
 import { getData } from "~/api/api";
 import { GetRequestParts } from "~/types/requestPartsTypes";
 import { ResponseEntity } from "~/types/responseTypes";
+import { data } from "@remix-run/react";
 
 export const useGetRequest = () => {
     const { isAuthenticated } = useAuth0();
@@ -24,7 +25,7 @@ export const useGetRequest = () => {
                 console.log("リクエスト開始");
                 const response = await getData<T>(
                     parts.apiPath,
-                    accessToken
+                    accessToken,
                 );
                 if ( response ) {
                     console.log("Response:", response);

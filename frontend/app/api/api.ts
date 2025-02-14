@@ -1,6 +1,6 @@
 export const getData = async <T>(
     url: string,
-    token: string
+    token: string,
 ): Promise<T> => {
     const response = await fetch(url, {
         method: "GET",
@@ -99,4 +99,19 @@ export const deleteData = async (
     }  
 };
 
+export const getDataWithoutAccessToken = async (
+    url: string,
+) => {
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
   
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+  
+    return response.json();
+};
