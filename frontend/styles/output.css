@@ -107,7 +107,7 @@
 }
 
 /*
-! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -592,6 +592,10 @@ video {
   pointer-events: none;
 }
 
+.visible {
+  visibility: visible;
+}
+
 .absolute {
   position: absolute;
 }
@@ -679,6 +683,10 @@ video {
   margin-inline-end: 0.625rem;
 }
 
+.ml-0 {
+  margin-left: 0px;
+}
+
 .ml-1 {
   margin-left: 0.25rem;
 }
@@ -693,6 +701,10 @@ video {
 
 .ml-8 {
   margin-left: 2rem;
+}
+
+.mr-0 {
+  margin-right: 0px;
 }
 
 .mr-2 {
@@ -988,6 +1000,10 @@ video {
 
 .rounded {
   border-radius: 0.25rem;
+}
+
+.rounded-custom {
+  border-radius: 0.3rem;
 }
 
 .rounded-full {
@@ -1348,6 +1364,11 @@ video {
   color: rgb(31 41 55 / var(--tw-text-opacity, 1));
 }
 
+.text-red-500 {
+  --tw-text-opacity: 1;
+  color: rgb(239 68 68 / var(--tw-text-opacity, 1));
+}
+
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
@@ -1355,6 +1376,11 @@ video {
 
 .outline {
   outline-style: solid;
+}
+
+.blur {
+  --tw-blur: blur(8px);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
 .filter {
@@ -1416,6 +1442,49 @@ body {
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
+}
+
+input[type="date"] {
+  width: 150px;
+  height: 30px;
+  position: relative;
+}
+
+/* Chrome、Safari、Edge 用 */
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  z-index: 1;
+}
+
+/* Firefox 用 */
+
+input[type="date"]::-moz-calendar-picker-indicator {
+  display: none;
+}
+
+/* Internet Explorer 用 */
+
+input[type="date"]::-ms-clear {
+  display: none;
+}
+
+input[type="date"]::after {
+  content: '';
+  background-image: url(/_i_icon_12558_icon_125580.svg);
+  /* カスタムアイコンのパス */
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: 0 0;
+  width: 18px;
+  /* アイコンの幅 */
+  height: 18px;
+  /* アイコンの高さ */
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  /* 必要に応じて調整 */
+  transform: translateY(-50%);
 }
 
 .after\:absolute::after {
@@ -1658,6 +1727,16 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
+  .dark\:bg-white {
+    --tw-bg-opacity: 1;
+    background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+  }
+
+  .dark\:text-gray-600 {
+    --tw-text-opacity: 1;
+    color: rgb(75 85 99 / var(--tw-text-opacity, 1));
+  }
+
   .dark\:text-neutral-400 {
     --tw-text-opacity: 1;
     color: rgb(163 163 163 / var(--tw-text-opacity, 1));

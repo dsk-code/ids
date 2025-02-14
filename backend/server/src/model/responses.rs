@@ -1,3 +1,4 @@
+pub mod address_search;
 pub mod classes;
 pub mod me;
 pub mod teachers;

@@ -1,3 +1,4 @@
+import { ResponseGetAddress } from "./addressTypes";
 import { Class } from "./classTypes";
 import { PaginatedTeachersList, Teacher, TeacherId } from "./teachersTypes";
 
@@ -6,4 +7,5 @@ export type ResponseEntity =
     | Class[]
     | Teacher
     | PaginatedTeachersList
-    | TeacherId;
+    | TeacherId
+    | ResponseGetAddress;

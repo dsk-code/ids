@@ -7,5 +7,7 @@ export type ApiPath =
     | `${string}/teachers`
     | `${string}/teachers?offset=${string}&limit=${string}&status=${string}`
     | `${string}/teachers/${string}`
+    | `${string}/get_address?postCode=${string}`
+
 
 

@@ -23,6 +23,8 @@ pub enum Error {
     #[error("Password hashing failed.")]
     PasswordHashingError,
     #[error("{0}")]
+    ReqwestError(#[from] reqwest::Error),
+    #[error("{0}")]
     DbError(#[from] db::error::Error),
     #[error("not found: {0}")]
     NotFound(String),

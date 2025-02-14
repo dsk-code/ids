@@ -28,6 +28,7 @@ pub struct Config {
     pub cors_url_1: String,
     pub cors_url_2: String,
     pub port: String,
+    pub address_search_url: String,
 }
 
 #[derive(Clone)]

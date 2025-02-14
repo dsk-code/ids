@@ -43,17 +43,33 @@ export interface RequestPostTeacher {
     phone?: string;
     mobilePhone?: string;
     email?: string;
-    postCode1: string;
-    postCode2: string;
+    postCode: string;
     prefecture: string;
     city: string;
     streetAddress: string;
     building?: string;
-    prefecturesKana?: string;
-    cityKana?: string;
-    buildingKana?: string;
     hireDate: string;
 }
+// export interface RequestPostTeacher {
+//     lastName: string;
+//     firstName: string;
+//     lastNameKana?: string;
+//     firstNameKana?: string;
+//     phone?: string;
+//     mobilePhone?: string;
+//     email?: string;
+//     postCode1: string;
+//     postCode2: string;
+//     prefecture: string;
+//     city: string;
+//     streetAddress: string;
+//     building?: string;
+//     prefecturesKana?: string;
+//     cityKana?: string;
+//     buildingKana?: string;
+//     hireDate: string;
+// }
+
 
 export interface RequestPutTeacher {
     lastName: string;

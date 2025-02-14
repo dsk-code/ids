@@ -1,3 +1,4 @@
+import { RequestGetAddress } from "./addressTypes";
 import { RequestPostClass, RequestPutClass } from "./classTypes";
 import { RequestPatchTeacher, RequestPostTeacher, RequestPutTeacher } from "./teachersTypes";
 
@@ -6,4 +7,4 @@ export type Payload =
     | RequestPutClass
     | RequestPostTeacher
     | RequestPutTeacher
-    | RequestPatchTeacher;
+    | RequestPatchTeacher

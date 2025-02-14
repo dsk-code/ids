@@ -24,6 +24,9 @@ export default {
         "selected-text": "#A3A3FF",
         theme: "#5c318c",
       },
+      borderRadius: {
+        'custom': '0.3rem', // 例: 0.3remの角丸
+      },
     },
   },
   plugins: [],

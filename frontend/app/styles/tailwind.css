@@ -10,3 +10,39 @@ body {
     color-scheme: dark;
   }
 }
+
+input[type="date"] {
+  width: 150px;
+  height: 30px;
+  position: relative;
+}
+
+/* Chrome、Safari、Edge 用 */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  z-index: 1;
+}
+
+/* Firefox 用 */
+input[type="date"]::-moz-calendar-picker-indicator {
+  display: none;
+}
+
+/* Internet Explorer 用 */
+input[type="date"]::-ms-clear {
+  display: none;
+}
+
+input[type="date"]::after {
+  content: '';
+  background-image: url(/_i_icon_12558_icon_125580.svg); /* カスタムアイコンのパス */
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: 0 0;
+  width: 18px; /* アイコンの幅 */
+  height: 18px; /* アイコンの高さ */
+  position: absolute;
+  top: 50%;
+  right: 10px; /* 必要に応じて調整 */
+  transform: translateY(-50%);
+}

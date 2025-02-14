@@ -1,3 +1,4 @@
+pub mod address_search;
 pub mod classes;
 pub mod root;
 pub mod teachers;
@@ -15,7 +16,8 @@ pub fn api<A: AuthUserExt>(state: Arc<State>) -> Router {
         .nest_service("/me", root::router::<AuthUser>())
         .nest_service("/classes", classes::router::<AuthUser>())
         // todo: teschers router
-        // .nest_service("/teachers", service)
+        .nest_service("/teachers", teachers::router::<AuthUser>())
+        .nest_service("/get_address", address_search::router::<AuthUser>())
         .layer(from_fn_with_state(state.clone(), authorization_middleware))
         .layer(Extension(state))
 }

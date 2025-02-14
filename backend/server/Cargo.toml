@@ -24,6 +24,8 @@ uuid = { workspace = true }
 tower = { workspace = true }
 serde_json = { workspace = true }
 anyhow = { workspace = true }
+reqwest = { workspace = true }
+mime = { workspace = true }
 
 ids_auth = { path = "../auth/" }
 ids_database = { path = "../database/" }
@@ -31,5 +33,4 @@ ids_shared = {path = "../shared/"}
 
 [dev-dependencies]
 fake = { workspace = true }
-mime = { workspace = true }
 rstest = { workspace = true }
