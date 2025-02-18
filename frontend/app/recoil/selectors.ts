@@ -1,6 +1,6 @@
 import { selectorFamily } from "recoil";
 import { userState } from "./atoms";
-import { User } from "../types/userTypes";
+import { User } from "../types/users/userTypes";
 
 export const getUserById = selectorFamily({
     key: "getUserById",

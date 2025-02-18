@@ -1,8 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react"
 import { useAccessToken } from "../accesstoken/useAccessToken";
 import { getData } from "~/api/api";
-import { GetRequestParts } from "~/types/requestPartsTypes";
-import { ResponseEntity } from "~/types/responseTypes";
+import { GetRequestParts } from "~/types/request/requestPartsTypes";
+import { ResponseEntity } from "~/types/response/responseTypes";
 import { data } from "@remix-run/react";
 
 export const useGetRequest = () => {

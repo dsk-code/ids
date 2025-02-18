@@ -1,5 +1,5 @@
 import React from 'react'
-import { User } from '../types/userTypes';
+import { User } from '../types/users/userTypes';
 import { Link } from '@remix-run/react';
 
 type UsersListItemProps = {

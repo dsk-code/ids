@@ -11,8 +11,8 @@ import { useGetRequest } from "~/hooks/request/useGetRequest";
 import { usePostRequest } from "~/hooks/request/usePostRequest";
 import useEnv from "~/hooks/useEnv";
 import { classListState } from "~/recoil/atoms";
-import { Class, RequestPostClass } from "~/types/classTypes";
-import { GetRequestParts, PostRequestParts } from "~/types/requestPartsTypes";
+import { Class, RequestPostClass } from "~/types/classes/classTypes";
+import { GetRequestParts, PostRequestParts } from "~/types/request/requestPartsTypes";
 
 export default function ClassList() {
     const { isAuthenticated } = useAuth0();

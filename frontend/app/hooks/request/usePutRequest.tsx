@@ -1,8 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react"
 import { useAccessToken } from "../accesstoken/useAccessToken";
 import { putData } from "~/api/api";
-import { ResponseEntity } from "~/types/responseTypes";
-import { PutRequestParts } from "~/types/requestPartsTypes";
+import { ResponseEntity } from "~/types/response/responseTypes";
+import { PutRequestParts } from "~/types/request/requestPartsTypes";
 
 export const usePutRequest = () => {
     const { isAuthenticated } = useAuth0();

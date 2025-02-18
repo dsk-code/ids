@@ -279,15 +279,16 @@ components:
                     type: string
                 firstNameKana:
                     type: string
+                birthdate:
+                    type: string
+                    format: date
                 phone:
                     type: string
                 mobilePhone:
                     type: string
                 email:
                     type: string
-                postCode1:
-                    type: string
-                postCode2:
+                postCode:
                     type: string
                 prefecture:
                     type: string
@@ -296,12 +297,6 @@ components:
                 streetAddress:
                     type: string
                 building:
-                    type: string
-                prefecturesKana:
-                    type: string
-                cityKana:
-                    type: string
-                buildingKana:
                     type: string
                 hireDate:
                     type: string
@@ -322,8 +317,10 @@ components:
               - userId
               - lastName
               - firstName
-              - postCode1
-              - postCode2
+              - lastNameKana
+              - firstNameKana
+              - birthdate
+              - postCode
               - prefectures
               - city
               - streetAddress
@@ -359,15 +356,16 @@ components:
                     type: string
                 firstNameKana:
                     type: string
+                birthdate:
+                    type: string
+                    format: date
                 phone:
                     type: string
                 mobilePhone:
                     type: string
                 email:
                     type: string
-                postCode1:
-                    type: string
-                postCode2:
+                postCode:
                     type: string
                 prefecture:
                     type: string
@@ -377,18 +375,14 @@ components:
                     type: string
                 building:
                     type: string
-                prefecturesKana:
-                    type: string
-                cityKana:
-                    type: string
-                buildingKana:
-                    type: string
                 hireDate:
                     type: string
                     format: date
             required:
                 - lastName
                 - firstName
+                - lastNameKana
+                - firstNameKana
                 - postCode1
                 - postCode2
                 - prefectures

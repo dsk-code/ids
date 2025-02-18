@@ -1,8 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react"
 import { useAccessToken } from "../accesstoken/useAccessToken";
 import { patchData } from "~/api/api";
-import { ResponseEntity } from "~/types/responseTypes";
-import { PatchRequestParts } from "~/types/requestPartsTypes";
+import { ResponseEntity } from "~/types/response/responseTypes";
+import { PatchRequestParts } from "~/types/request/requestPartsTypes";
 
 export const usePatchRequest = () => {
     const { isAuthenticated } = useAuth0();

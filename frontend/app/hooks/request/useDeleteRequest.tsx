@@ -1,7 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react"
 import { useAccessToken } from "../accesstoken/useAccessToken";
 import { deleteData } from "~/api/api";
-import { DeleteRequestParts, GetRequestParts } from "~/types/requestPartsTypes";
+import { DeleteRequestParts, GetRequestParts } from "~/types/request/requestPartsTypes";
 
 export const useDeleteRequest = () => {
     const { isAuthenticated } = useAuth0();

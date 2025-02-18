@@ -1,12 +1,15 @@
 import { Modal, Button, Container, TextInput, Space, Group, Text, Box, LoadingOverlay } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import React, { useState } from 'react';
-import { useFormInputKeyDown } from '~/hooks/useFormInputKeyDown';
+import { useFormInputKeyDown } from '~/hooks/form/useFormInputKeyDown';
 import { useGetRequest } from '~/hooks/request/useGetRequest';
-import { ResponseGetAddress } from '~/types/addressTypes';
-import { GetRequestParts } from '~/types/requestPartsTypes';
+import { ResponseGetAddress } from '~/types/streetAddress/addressTypes';
+import { GetRequestParts } from '~/types/request/requestPartsTypes';
 import useEnv from '~/hooks/useEnv';
 import { useDisclosure } from '@mantine/hooks';
+import { AsYouType } from 'libphonenumber-js'
+import { useFormUtil } from '~/hooks/form/useFormUtil';
+import moji from 'moji';
 
 interface InputTeacherData {
     lastName: string;
@@ -14,12 +17,8 @@ interface InputTeacherData {
     lastNameKana: string;
     firstNameKana: string;
     birthdate: string;
-    phone1: string;
-    phone2: string;
-    phone3: string;
-    mobilePhone1: string;
-    mobilePhone2: string;
-    mobilePhone3: string;
+    phone: string;
+    mobilePhone: string;
     email: string;
     postCode: string;
     prefecture: string;
@@ -52,6 +51,7 @@ export const CreateTeacherModal: React.FC<Props> = ({
     const { backendApiUrl } = useEnv();
     const [formKey, setFormKey] = useState(0); // フォームのキーを管理
     const [visible, { toggle, close }] = useDisclosure(false);
+    const { postCodeWithHyphen } = useFormUtil();
 
     const handleClick = async () => {
         const getedValues = form.getValues();
@@ -72,88 +72,119 @@ export const CreateTeacherModal: React.FC<Props> = ({
                     form.setValues((prev) => ({
                         ...prev,
                         prefecture: address.address1,
-                        city: `${address.address2}${address.address3}`,
+                        city: address.address2,
+                        streetAddress: address.address3,
                     }));
                     close();
-                    setFormKey((prev) => prev + 1); // フォームを再レンダリング
-                    console.log("Updated form values:", form.values);
                 })
             }
         }
         close();
     }
+
+    const handleBlurFamilyNameKana = (event: React.FocusEvent<HTMLInputElement>) => {
+        const getedValues = form.getValues();
+        const formatLastNameKana = moji(getedValues.lastNameKana).convert('HG', 'KK').toString();
+        form.resetDirty();
+        form.setValues((prev) => ({
+            ...prev,
+            lastNameKana: formatLastNameKana,
+        }));
+        form.validateField("lastNameKana");
+    }
+
+    const handleBlurGivenNameKana = (event: React.FocusEvent<HTMLInputElement>) => {
+        const getedValues = form.getValues();
+        const formatFirstNameKana = moji(getedValues.firstNameKana).convert('HG', 'KK').toString();
+        form.resetDirty();
+        form.setValues((prev) => ({
+            ...prev,
+            firstNameKana: formatFirstNameKana
+        }));
+        form.validateField("firstNameKana");
+    }
+
+    const handleBlurPhone = (event: React.FocusEvent<HTMLInputElement>) => {
+        const getedValues = form.getValues();
+        const formatPhone = new AsYouType('JP').input(getedValues.phone);
+        form.resetDirty();
+        form.setValues((prev) => ({
+            ...prev,
+            phone: formatPhone,
+        }));
+        form.validateField("phone");
+    }
+
+    const handleBlurMobilePhone = (event: React.FocusEvent<HTMLInputElement>) => {
+        const getedValues = form.getValues();
+        const formatMobilePhone = new AsYouType('JP').input(getedValues.mobilePhone);
+        form.resetDirty();
+        form.setValues((prev) => ({
+            ...prev,
+            mobilePhone: formatMobilePhone,
+        }));
+        form.validateField("mobilePhone");
+    }
+    
+    const handleBlurPostCode = (event: React.FocusEvent<HTMLInputElement>) => {
+        const getedValues = form.getValues();
+        const postCode = postCodeWithHyphen(getedValues.postCode);
+        form.resetDirty();
+        form.setValues((prev) => ({
+            ...prev,
+            postCode: postCode,
+        }));
+        form.validateField("postCode");
+    }
     
     return (
         <>
-            <Modal opened={opened} onClose={handlers.close} size="auto" title="教職員作成">
+            <Modal opened={opened} onClose={handlers.close} size="auto" title="教職員登録">
                 <Container size="xs">
                     <Box pos="relative">
                         <LoadingOverlay visible={visible} loaderProps={{ children: '読み込み中...' }} />
-                        {/* ...other content */}
-                        <form key={formKey} onSubmit={form.onSubmit(handleCreate)}>
+                        <form onSubmit={form.onSubmit(handleCreate)}>
                             <Group grow>
-                                <TextInput label="姓" placeholder='姓' withAsterisk aria-label='lastName' {...form.getInputProps("lastName")} onKeyDown={handleFormInputKeyDown} />
-                                <TextInput label="名" placeholder='名' withAsterisk aria-label='firstName' {...form.getInputProps("firstName")} onKeyDown={handleFormInputKeyDown} />
+                                <TextInput name="family-name" label="姓" placeholder='姓' withAsterisk aria-label='lastName' {...form.getInputProps("lastName")} onKeyDown={handleFormInputKeyDown} />
+                                <TextInput name="given-name" label="名" placeholder='名' withAsterisk aria-label='firstName' {...form.getInputProps("firstName")} onKeyDown={handleFormInputKeyDown} />
                             </Group>
                             <Group grow>
-                                <TextInput label="セイ" placeholder='セイ' withAsterisk aria-label='lastNameKana' {...form.getInputProps("lastNameKana")} onKeyDown={handleFormInputKeyDown} />
-                                <TextInput label="メイ" placeholder='メイ' withAsterisk aria-label='firstNameKana' {...form.getInputProps("firstNameKana")} onKeyDown={handleFormInputKeyDown} />
+                                <TextInput name="family-name-kana" label="セイ" placeholder='セイ' withAsterisk aria-label='lastNameKana' {...form.getInputProps("lastNameKana")} onKeyDown={handleFormInputKeyDown} onBlur={handleBlurFamilyNameKana}/>
+                                <TextInput name="given-name-kana" label="メイ" placeholder='メイ' withAsterisk aria-label='firstNameKana' {...form.getInputProps("firstNameKana")} onKeyDown={handleFormInputKeyDown} onBlur={handleBlurGivenNameKana}/>
                             </Group>
                             <div>
                                 <Text size="sm">生年月日<span className='text-red-500'> *</span></Text>
-                                <input type='date' className='bg-white text-gray-600 dark:text-gray-600 dark:bg-white border rounded-custom border-gray-300' min="1900-01-01" max="2500-12-31" required {...form.getInputProps("birthdate")}/>
+                                <input name="bday" type='date' className='bg-white text-gray-600 dark:text-gray-600 dark:bg-white border rounded-custom border-gray-300' min="1900-01-01" max="2500-12-31" required {...form.getInputProps("birthdate")}/>
                                 {form.errors.birthdate && (
                                     <Text size="xs" c="red">{form.errors.birthdate}</Text>
                                 )}
                             </div>
-                            <Group gap="xs">
-                                <TextInput label="固定電話" placeholder='0000' aria-label='phone' size="xs" styles={{ input: { minWidth: 60, maxWidth: 60 } }} {...form.getInputProps("phone1")} onKeyDown={handleFormInputKeyDown} />
-                                <div>
-                                    <Space h="lg" />
-                                    <Text>-</Text>
-                                </div>
-                                <TextInput label=" " placeholder='0000' aria-label='phone' size="xs" styles={{ input: { minWidth: 60, maxWidth: 60 } }} {...form.getInputProps("phone2")} onKeyDown={handleFormInputKeyDown} />
-                                <div>
-                                    <Space h="lg" />
-                                    <Text>-</Text>
-                                </div>
-                                <TextInput label=" " placeholder='0000' aria-label='phone' size="xs" styles={{ input: { minWidth: 60, maxWidth: 60 } }} {...form.getInputProps("phone3")} onKeyDown={handleFormInputKeyDown} />
-                            </Group>
-                            <Group gap="xs">
-                                <TextInput label="携帯電話" placeholder='000' aria-label='phone' size="xs" styles={{ input: { minWidth: 60, maxWidth: 60 } }} {...form.getInputProps("mobilePhone1")} onKeyDown={handleFormInputKeyDown} />
-                                <div className='ml-0'>
-                                    <Space h="lg" />
-                                    <Text>-</Text>
-                                </div>
-                                <TextInput label=" " placeholder='0000' aria-label='phone' size="xs" styles={{ input: { minWidth: 60, maxWidth: 60 } }} {...form.getInputProps("mobilePhone2")} onKeyDown={handleFormInputKeyDown} />
-                                <div>
-                                    <Space h="lg" />
-                                    <Text>-</Text>
-                                </div>
-                                <TextInput label=" " placeholder='0000' aria-label='phone' size="xs" styles={{ input: { minWidth: 60, maxWidth: 60 } }} {...form.getInputProps("mobilePhone3")} onKeyDown={handleFormInputKeyDown} />
+                            <Group grow>
+                                <TextInput name="tel" type="tel" label="固定電話" placeholder='例) 00000000000' aria-label='phone' size="xs" {...form.getInputProps("phone")} onKeyDown={handleFormInputKeyDown} onBlur={handleBlurPhone}/>
+                                <TextInput name="tel2" type="tel" label="携帯電話" placeholder='例) 09000000000' aria-label='mobilePhone' size="xs" {...form.getInputProps("mobilePhone")} onKeyDown={handleFormInputKeyDown} onBlur={handleBlurMobilePhone}/>
                             </Group>
                             <div>
-                                <TextInput label="メールアドレス" placeholder='メールアドレス' aria-label='email' {...form.getInputProps("email")} onKeyDown={handleFormInputKeyDown} />
+                                <TextInput name="email" type="email" label="メールアドレス" placeholder='メールアドレス' aria-label='email' {...form.getInputProps("email")} onKeyDown={handleFormInputKeyDown} />
                             </div>
                             <Group>
-                                <TextInput label="郵便番号" placeholder='例) 1600022' description='７桁のハイフンを含まない半角数字' size="xs" withAsterisk aria-label='postCode' styles={{ input: { maxWidth: 100 } }} {...form.getInputProps("postCode")} onKeyDown={handleFormInputKeyDown} />
+                                <TextInput name="postal-code" label="郵便番号" placeholder='例) 1600022' size="xs" withAsterisk aria-label='postCode' styles={{ input: { maxWidth: 120 } }} {...form.getInputProps("postCode")} onKeyDown={handleFormInputKeyDown} onBlur={handleBlurPostCode}/>
                                 <div className='ml-0 mr-0'>
                                     <Space h="md" />
                                     <Button mb={0} variant="light" color="gray" onClick={handleClick}>住所検索</Button>
                                 </div>
                             </Group>
                             <Group>
-                                <TextInput label="都道府県" placeholder='都道府県' withAsterisk aria-label='prefecture' styles={{ input: { maxWidth: 100 } }} {...form.getInputProps("prefecture")} onKeyDown={handleFormInputKeyDown} />
-                                <TextInput label="市町村区" placeholder='市町村区' withAsterisk aria-label='city' {...form.getInputProps("city")} onKeyDown={handleFormInputKeyDown} />
+                                <TextInput name="address-level1" label="都道府県" placeholder='都道府県' withAsterisk aria-label='prefecture' styles={{ input: { maxWidth: 100 } }} {...form.getInputProps("prefecture")} onKeyDown={handleFormInputKeyDown} />
+                                <TextInput name="address-level2" label="市町村区" placeholder='市町村区' withAsterisk aria-label='city' {...form.getInputProps("city")} onKeyDown={handleFormInputKeyDown} />
                             </Group>
                             <div>
-                                <TextInput label="番地" placeholder='番地' withAsterisk aria-label='streetAddress' {...form.getInputProps("streetAddress")} onKeyDown={handleFormInputKeyDown} />
+                                <TextInput name="street-address" label="町名・番地" placeholder='町名・番地' withAsterisk aria-label='streetAddress' {...form.getInputProps("streetAddress")} onKeyDown={handleFormInputKeyDown} />
                             </div>
                             <div>
-                                <TextInput label="建物名、部屋番号" placeholder='建物名、部屋番号' aria-label='building' {...form.getInputProps("building")} onKeyDown={handleFormInputKeyDown}/>
+                                <TextInput name="building" label="建物名、部屋番号" placeholder='建物名、部屋番号' aria-label='building' {...form.getInputProps("building")} onKeyDown={handleFormInputKeyDown}/>
                             </div>
-                            {/* <div>
-                                <DatesProvider  settings={{ consistentWeeks: true }}>
+                            <div>
+                                {/* <DatesProvider  settings={{ consistentWeeks: true }}>
                                     <DateInput
                                         label="入園日"
                                         placeholder="入園日"
@@ -170,8 +201,8 @@ export const CreateTeacherModal: React.FC<Props> = ({
                                         onKeyDown={handleFormInputKeyDown}
                                         {...form.getInputProps("hireDate")}
                                         />
-                                </DatesProvider>
-                            </div> */}
+                                </DatesProvider> */}
+                            </div>
                             <div>
                                 <Text size="sm">入園日<span className='text-red-500'> *</span></Text>
                                 <input type='date' className='bg-white text-gray-600 dark:text-gray-600 dark:bg-white border rounded-custom border-gray-300' min="1900-01-01" max="2500-12-31" required {...form.getInputProps("hireDate")}/>

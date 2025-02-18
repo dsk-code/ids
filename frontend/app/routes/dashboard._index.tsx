@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useAuth0 } from "@auth0/auth0-react";
 import useEnv from '../hooks/useEnv';
-import { AuthUser, ResponseAuthUser } from '../types/userTypes';
+import { AuthUser, ResponseAuthUser } from '../types/users/userTypes';
 import { postData } from '../api/api';
 import { useRecoilState } from 'recoil';
 import { authUserState } from '../recoil/atoms';

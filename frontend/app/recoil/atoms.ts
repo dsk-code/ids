@@ -1,7 +1,7 @@
 import { atom } from "recoil";
-import { User, ResponseAuthUser } from "../types/userTypes";
-import { Class, RequestPostClass } from "../types/classTypes";
-import { Teacher } from "~/types/teachersTypes";
+import { User, ResponseAuthUser } from "../types/users/userTypes";
+import { Class, RequestPostClass } from "../types/classes/classTypes";
+import { Teacher } from "~/types/teachers/teachersTypes";
 
 export const authUserState = atom<ResponseAuthUser>({
     key: "authUserState",

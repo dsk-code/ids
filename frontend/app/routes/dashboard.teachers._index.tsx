@@ -12,9 +12,10 @@ import { useGetRequest } from "~/hooks/request/useGetRequest";
 import { usePostRequest } from "~/hooks/request/usePostRequest";
 import useEnv from "~/hooks/useEnv";
 import { classListState, teachersListState } from "~/recoil/atoms";
-import { Class, RequestPostClass } from "~/types/classTypes";
-import { GetRequestParts, PostRequestParts } from "~/types/requestPartsTypes";
-import { Teacher } from "~/types/teachersTypes";
+import { Class, RequestPostClass } from "~/types/classes/classTypes";
+import { GetRequestParts, PostRequestParts } from "~/types/request/requestPartsTypes";
+import { Teacher } from "~/types/teachers/teachersTypes";
+import { AsYouType, isValidPhoneNumber } from 'libphonenumber-js'
 
 export default function TeachersList() {
     const { isAuthenticated } = useAuth0();
@@ -25,19 +26,15 @@ export default function TeachersList() {
     const { postRequest } = usePostRequest();
     const [opened, handlers] = useDisclosure(false);
     const form = useForm({
-        mode: 'uncontrolled',
+        mode: 'controlled',
         initialValues: {
             lastName: "",
             firstName: "",
             lastNameKana: "",
             firstNameKana: "",
             birthdate: "",
-            phone1: "",
-            phone2: "",
-            phone3: "",
-            mobilePhone1: "",
-            mobilePhone2: "",
-            mobilePhone3: "",
+            phone: "",
+            mobilePhone: "",
             email: "",
             postCode: "",
             prefecture: "",
@@ -52,21 +49,16 @@ export default function TeachersList() {
             lastNameKana: (value) => /^[\p{Script=Katakana}ー々]+$/u.test(value) ? null : "カタカナで入力してください",
             firstNameKana: (value) => /^[\p{Script=Katakana}ー々]+$/u.test(value) ? null : "カタカナで入力してください",
             birthdate: isNotEmpty("生年月日を入力してください"),
-            phone1: (value) => value === "" || /^[0-9]+$/.test(value) ? null : "半角数字で入力してください",
-            phone2: (value) => value === "" || /^[0-9]+$/.test(value) ? null : "半角数字で入力してください",
-            phone3: (value) => value === "" || /^[0-9]+$/.test(value) ? null : "半角数字で入力してください",
-            mobilePhone1: (value) => value === "" || /^[0-9]+$/.test(value) ? null : "半角数字で入力してください",
-            mobilePhone2: (value) => value === "" || /^[0-9]+$/.test(value) ? null : "半角数字で入力してください",
-            mobilePhone3: (value) => value === "" || /^[0-9]+$/.test(value) ? null : "半角数字で入力してください",
+            phone: (value) => value === "" || isValidPhoneNumber(value, 'JP') ? null : "正しい形式で入力してください",
+            mobilePhone: (value) => value === "" || isValidPhoneNumber(value, 'JP') ? null : "正しい形式で入力してください",
             email: (value) => value === "" || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/.test(value) ? null : "無効なメールアドレスです",
-            postCode: (value) => /^[0-9]{7}$/.test(value) ? null : "7桁の半角数字のみ入力してください",
+            postCode: (value) => /^[0-9]{3}-[0-9]{4}$/.test(value) ? null : "正しい形式で入力してください",
             prefecture: isNotEmpty("入力してください"),
             city: isNotEmpty("入力してください"),
             streetAddress: isNotEmpty("入力してください"),
             hireDate: isNotEmpty("入園日を入力してください"),
         },
         validateInputOnBlur: true,
-
     });
 
     // useEffect(() => {
