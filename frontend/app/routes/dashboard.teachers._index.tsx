@@ -69,44 +69,54 @@ export default function TeachersList() {
 
     });
 
-    // useEffect(() => {
-        // const fetchClassList = async () => {
-        //     setIsLoading(true);
-        //     const parts: GetRequestParts = {
-        //         apiPath: `${backendApiUrl}/classes`,
-        //     }
-        //     const response = await getRequest<Class[]>(parts);
-        //     if (response?.success && response?.data) {
-        //         setClassList(response.data);
-        //     } else {
-        //         console.error(response?.message);
-        //     }
-        // };
-        // fetchClassList();
-        // setIsLoading(false);
-    // }, [classList.length]);
+    useEffect(() => {
+        const fetchTeachersList = async () => {
+            setIsLoading(true);
+            const parts: GetRequestParts = {
+                apiPath: `${backendApiUrl}/teachers?offset=0&limit=50&status=active`,
+            }
+            const response = await getRequest<PaginatedTeachersList>(parts);
+            if (response?.success && response?.data) {
+                setTeachersList(response.data.teachers);
+            } else {
+                console.error(response?.message);
+            }
+            setIsLoading(false);
+        };
+        fetchTeachersList();
+    }, [teachersList.length]);
 
     const handleCreate = async (values: typeof form.values) => {
-        // const age = parseInt(values.age, 10);
-        // const payload: RequestPostClass = {
-        //     className: values.className,
-        //     age,
-        // }
-        // const parts: PostRequestParts = {
-        //     apiPath: `${backendApiUrl}/classes`,
-        //     payload
-        // }
+        const payload: RequestPostTeacher = {
+            lastName: values.lastName,
+            firstName: values.firstName,
+            lastNameKana: values.lastNameKana,
+            firstNameKana: values.firstNameKana,
+            phone: values.phone1 && values.phone2 && values.phone3 ? 
+                `${values.phone1}-${values.phone2}-${values.phone3}` : undefined,
+            mobilePhone: values.mobilePhone1 && values.mobilePhone2 && values.mobilePhone3 ? 
+                `${values.mobilePhone1}-${values.mobilePhone2}-${values.mobilePhone3}` : undefined,
+            email: values.email || undefined,
+            postCode: values.postCode,
+            prefecture: values.prefecture,
+            city: values.city,
+            streetAddress: values.streetAddress,
+            building: values.building || undefined,
+            hireDate: values.hireDate,
+        }
+        const parts: PostRequestParts = {
+            apiPath: `${backendApiUrl}/teachers`,
+            payload
+        }
 
-        // const response = await postRequest<Teacher>(parts);
-
-        // if (response?.success) {
-        //     if (response.data) {
-        //         setTeachersList([...teachersList, response.data]);
-        //         handlers.close();
-        //     }
-        // } else {
-        //     console.log(response?.message);
-        // }
+        const response = await postRequest<Teacher>(parts);
+        if (response?.success && response.data) {
+            setTeachersList([...teachersList, response.data]);
+            handlers.close();
+            form.reset();
+        } else {
+            console.log(response?.message);
+        }
     }
 
     if (isLoading) {
@@ -125,12 +135,12 @@ export default function TeachersList() {
                         </Group>
                         <ul>
                             {teachersList && (
-                                teachersList.map((cls) => (
-                                    <Link to={`/dashboard/classes/${cls.id}`} key={cls.id}>
+                                teachersList.map((teacher) => (
+                                    <Link to={`/dashboard/teachers/${teacher.id}`} key={teacher.id}>
                                         <Card className="border-2 border-gray-300 transition translate-y-4 hover:bg-gray-50 hover:shadow-lg" padding="lg" m="sm" radius="md" withBorder >
-                                            <p>{cls.lastName}: {cls.firstName}歳</p>
+                                            <p>{teacher.lastName} {teacher.firstName}先生</p>
+                                            <p>ステータス: {teacher.status}</p>
                                         </Card>
-
                                     </Link>
                                 ))
                             ) }          
